@@ -1,9 +1,6 @@
 # Luna ✦ Cozy Night Journal
 
 A warm, soft nightly sanctuary for self-reflection, mood tracking, and preserving your memories.
-
-👉 **Live Site:** [https://whimsical-queijadas-76d160.netlify.app](https://whimsical-queijadas-76d160.netlify.app)
-
 ---
 
 ## 🌟 Features
