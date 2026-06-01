@@ -1,0 +1,412 @@
+.memory-wall-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+  padding-bottom: 50px;
+}
+
+.memory-wall-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.memory-wall-info h2 {
+  font-size: 2.2rem;
+  color: var(--text-main);
+  text-shadow: var(--accent-glow);
+}
+
+.memory-wall-info p {
+  color: var(--text-muted);
+}
+
+/* Controls: Zoom toggles */
+.wall-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.mood-legend {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  background: var(--panel-bg);
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: 1px solid var(--panel-border);
+  font-size: 0.8rem;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+/* The Board */
+.pegboard-wall {
+  width: 100%;
+  background: radial-gradient(circle, rgba(255,255,255,0.03) 1px, transparent 1px) 0 0 / 20px 20px, var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: 24px;
+  box-shadow: 0 10px 30px var(--panel-shadow);
+  padding: 40px 30px;
+  min-height: 500px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Grid of memories */
+.memory-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 25px;
+  width: 100%;
+  transition: all 0.5s ease;
+}
+
+/* Zoom variations (keep 6 columns) */
+.memory-grid.zoomed-out {
+  grid-template-columns: repeat(6, 1fr);
+  gap: 15px;
+}
+
+.memory-grid.zoomed-out .hanging-card {
+  transform: scale(0.8);
+  font-size: 0.7rem;
+}
+
+@media (max-width: 992px) {
+  .memory-grid, .memory-grid.zoomed-out {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+  }
+}
+
+@media (max-width: 576px) {
+  .memory-grid, .memory-grid.zoomed-out {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+  }
+}
+
+/* Grid Item cell */
+.memory-cell {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+/* Empty placeholder cell */
+.memory-cell-empty {
+  width: 100%;
+  height: 100%;
+  border: 2px dashed rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+  padding: 10px;
+  gap: 4px;
+}
+
+.memory-cell-empty:hover {
+  border-color: var(--accent-color);
+  color: var(--accent-color);
+  background: rgba(255, 255, 255, 0.02);
+  box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.02);
+}
+
+.empty-plus {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.empty-date-label {
+  font-size: 0.65rem;
+  color: rgba(255, 255, 255, 0.25);
+  font-family: var(--font-header);
+  letter-spacing: 0.5px;
+  transition: color 0.3s ease;
+}
+
+.memory-cell-empty:hover .empty-date-label {
+  color: var(--accent-color);
+  opacity: 0.85;
+}
+
+/* Hanging clip elements */
+.peg-hook {
+  position: absolute;
+  top: 0;
+  width: 10px;
+  height: 10px;
+  background: #cbd5e0;
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.5), inset 0 1px 2px rgba(255,255,255,0.5);
+  z-index: 3;
+}
+
+.hanging-string {
+  position: absolute;
+  top: 5px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 1px;
+  height: 25px;
+  background: rgba(255, 255, 255, 0.25);
+  z-index: 2;
+}
+
+.wooden-clip {
+  position: absolute;
+  top: 25px;
+  width: 8px;
+  height: 18px;
+  background: #b08968;
+  border-radius: 1px;
+  border: 1px solid #7f5539;
+  box-shadow: 1px 2px 3px rgba(0,0,0,0.3);
+  z-index: 4;
+}
+
+.wooden-clip::after {
+  content: '';
+  position: absolute;
+  top: 6px; left: 0; right: 0;
+  height: 1px;
+  background: #4a5568;
+}
+
+/* Swinging card container */
+.hanging-card-wrapper {
+  position: absolute;
+  top: 35px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  transform-origin: top center;
+  z-index: 3;
+  animation: ambient-wind-swing 5s ease-in-out infinite alternate;
+}
+
+/* Swing animation on hover */
+.hanging-card-wrapper:hover {
+  animation: active-hover-swing 1.2s ease-in-out infinite alternate;
+}
+
+@keyframes ambient-wind-swing {
+  0% { transform: rotate(-2.5deg); }
+  100% { transform: rotate(2.5deg); }
+}
+
+@keyframes active-hover-swing {
+  0% { transform: rotate(-6deg) scale(1.05); }
+  100% { transform: rotate(6deg) scale(1.05); }
+}
+
+/* The Hanging Stamp Card itself */
+.hanging-card {
+  width: 90%;
+  margin: 0 auto;
+  aspect-ratio: 3.5 / 4.2;
+  background: #faf8f5;
+  color: #2c251e;
+  border-radius: 2px;
+  box-shadow: 2px 5px 12px rgba(0,0,0,0.25);
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border: 6px solid #faf8f5;
+  border-image: radial-gradient(circle, transparent 2px, #faf8f5 3px) 6 repeat;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  position: relative;
+  background-clip: padding-box;
+}
+
+/* Mood Color Border highlight */
+.hanging-card::before {
+  content: '';
+  position: absolute;
+  top: -4px; left: -4px; right: -4px; bottom: -4px;
+  border: 2px solid var(--mood-border-color, var(--mood-joyful));
+  pointer-events: none;
+  z-index: 2;
+}
+
+.hanging-card-img-box {
+  width: 100%;
+  height: 70%;
+  background: #eae6db;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.hanging-card-img-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.hanging-card-img-box .mood-solid-bg {
+  width: 100%;
+  height: 100%;
+  background: var(--mood-border-color);
+  opacity: 0.8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+}
+
+.hanging-card-date {
+  font-family: var(--font-header);
+  font-size: 0.75rem;
+  color: #635850;
+  text-align: center;
+  border-top: 1px dashed #eae6db;
+  padding-top: 2px;
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Journal View Details Modal Specifics */
+.view-modal-grid {
+  display: flex;
+  gap: 24px;
+}
+
+.view-modal-left {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.view-modal-right {
+  flex: 1.5;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+@media (max-width: 576px) {
+  .view-modal-grid {
+    flex-direction: column;
+  }
+  .pegboard-wall {
+    padding: 15px 10px;
+    min-height: auto;
+  }
+  .view-modal-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .view-modal-title {
+    width: 100%;
+  }
+  .view-modal-stamp {
+    align-self: center;
+  }
+}
+
+.view-modal-stamp {
+  width: 220px;
+  border: 12px solid #faf8f5;
+  border-image: radial-gradient(circle, transparent 4px, #faf8f5 5px) 12 repeat;
+  background: #faf8f5;
+  padding: 12px 12px 30px 12px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+
+.view-modal-stamp img {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+  border-radius: 2px;
+}
+
+.view-modal-text {
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--text-main);
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--panel-border);
+  border-radius: 12px;
+  padding: 16px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.view-modal-prompts {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.view-modal-prompt-item {
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  background: rgba(255,255,255,0.02);
+}
+
+.view-modal-prompt-item h4 {
+  font-size: 0.85rem;
+  margin-bottom: 4px;
+  color: var(--text-muted);
+}
+.view-modal-prompt-item p {
+  color: var(--text-main);
+}
+.view-modal-prompt-item.good { border-left: 3px solid var(--mood-joyful); }
+.view-modal-prompt-item.upset { border-left: 3px solid var(--mood-blue); }
+.view-modal-prompt-item.improve { border-left: 3px solid var(--mood-cozy); }
+
+.view-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--panel-border);
+  padding-bottom: 12px;
+  margin-bottom: 16px;
+}
+
+.view-modal-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.view-modal-mood-badge {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #1a202c;
+  text-transform: uppercase;
+}

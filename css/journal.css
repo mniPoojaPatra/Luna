@@ -1,0 +1,318 @@
+/* Journal Modal Notebook Layout */
+.notebook-container {
+  display: flex;
+  gap: 30px;
+  background: #fdfbf7;
+  color: #2c251e;
+  border-radius: 16px;
+  padding: 30px;
+  box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.05), 0 10px 30px rgba(0, 0, 0, 0.15);
+  position: relative;
+}
+
+/* Notebook middle fold */
+.notebook-container::after {
+  content: '';
+  position: absolute;
+  top: 0; bottom: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  background: linear-gradient(to right, rgba(0,0,0,0.1), rgba(0,0,0,0.02), rgba(0,0,0,0.1));
+}
+
+.notebook-page {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 50%;
+}
+
+@media (max-width: 768px) {
+  .notebook-container {
+    flex-direction: column;
+  }
+  .notebook-container::after {
+    display: none;
+  }
+  .notebook-page {
+    width: 100%;
+  }
+}
+
+.notebook-page h3 {
+  font-family: var(--font-header);
+  color: #4a3e3d;
+  border-bottom: 2px dashed #e9e4d9;
+  padding-bottom: 8px;
+  font-size: 1.3rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Mood selector circles */
+.mood-picker-group {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 10px 0;
+}
+
+.mood-option {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  background: rgba(0,0,0,0.02);
+}
+
+.mood-option:hover {
+  background: rgba(0,0,0,0.05);
+  transform: translateY(-2px);
+}
+
+.mood-color-circle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid white;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.mood-option.active {
+  background: rgba(0,0,0,0.08);
+}
+
+.mood-option.active .mood-color-circle {
+  transform: scale(1.15);
+  box-shadow: 0 0 10px var(--mood-color, #ffd166);
+}
+
+.mood-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #635850;
+  text-transform: uppercase;
+}
+
+/* Stamp card photo component */
+.stamp-card-creator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.stamp-card {
+  position: relative;
+  width: 220px;
+  height: 260px;
+  background: #faf8f5;
+  padding: 12px 12px 35px 12px;
+  box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border: 12px solid #faf8f5;
+  border-image: radial-gradient(circle, transparent 4px, #faf8f5 5px) 12 repeat;
+  transition: transform 0.3s ease;
+}
+
+/* Stamp postmark overlay */
+.stamp-card::after {
+  content: 'LUNA POST';
+  font-family: var(--font-header);
+  font-size: 0.5rem;
+  font-weight: 700;
+  color: rgba(99, 88, 80, 0.12);
+  border: 1.5px dashed rgba(99, 88, 80, 0.12);
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  transform: rotate(-15deg);
+  pointer-events: none;
+  text-align: center;
+}
+
+.stamp-media-box {
+  width: 100%;
+  height: 170px;
+  background: #eae6db;
+  border-radius: 4px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stamp-media-box video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scaleX(-1); /* mirror camera */
+}
+
+.stamp-media-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.stamp-media-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: #8c8172;
+  font-size: 0.8rem;
+  text-align: center;
+  padding: 20px;
+  cursor: pointer;
+}
+
+.stamp-media-placeholder i {
+  font-size: 2rem;
+}
+
+.stamp-date {
+  font-family: var(--font-header);
+  font-size: 0.85rem;
+  color: #635850;
+  text-align: center;
+  margin-top: 4px;
+  border-top: 1px dashed #eae6db;
+  padding-top: 4px;
+  letter-spacing: 0.5px;
+}
+
+/* Flash animation on click */
+.camera-flash {
+  animation: flash-anim 0.3s ease-out;
+}
+
+@keyframes flash-anim {
+  0% { filter: brightness(3); }
+  100% { filter: brightness(1); }
+}
+
+.camera-controls {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  width: 100%;
+}
+
+.camera-btn {
+  background: #eae6db;
+  border: none;
+  color: #4a3e3d;
+  font-family: var(--font-header);
+  font-size: 0.8rem;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.camera-btn:hover {
+  background: #dcd7c9;
+}
+
+/* Structured inputs */
+.structured-reflection {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.reflection-box {
+  background: rgba(0,0,0,0.02);
+  border-radius: 12px;
+  border-left: 4px solid var(--accent-color);
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.reflection-box.good { border-left-color: var(--mood-joyful); }
+.reflection-box.upset { border-left-color: var(--mood-blue); }
+.reflection-box.improve { border-left-color: var(--mood-cozy); }
+
+.reflection-box label {
+  font-family: var(--font-header);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #4a3e3d;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.reflection-box textarea {
+  background: transparent;
+  border: none;
+  resize: none;
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  color: #2c251e;
+  outline: none;
+  height: 50px;
+}
+
+.diary-textarea {
+  background: rgba(0,0,0,0.02);
+  border: 1px solid #eae6db;
+  border-radius: 12px;
+  padding: 12px;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  color: #2c251e;
+  resize: none;
+  height: 120px;
+  outline: none;
+  transition: border-color 0.3s ease;
+}
+
+.diary-textarea:focus {
+  border-color: #8c8172;
+}
+
+.journal-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+/* Mobile adjustments for notebook editor */
+@media (max-width: 480px) {
+  .notebook-container {
+    padding: 15px 10px;
+    gap: 15px;
+  }
+  .mood-picker-group {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px;
+  }
+  .mood-option {
+    padding: 6px;
+    flex: none;
+    width: 30%;
+  }
+}

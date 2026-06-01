@@ -1,0 +1,991 @@
+.dashboard-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+  padding-bottom: 20px;
+  width: 100%;
+}
+
+.dashboard-header {
+  text-align: center;
+  margin-bottom: 5px;
+}
+
+.dashboard-header h2 {
+  font-size: 1.8rem;
+  color: var(--text-main);
+  text-shadow: var(--accent-glow);
+}
+
+.dashboard-header p {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+/* Desk Setup Area */
+.desk-setup {
+  width: 100%;
+  max-width: 1000px;
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 24px;
+  border: 1px solid var(--panel-border);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Back Wall area (above desk) */
+.desk-wall {
+  width: 100%;
+  min-height: 180px;
+  padding: 15px 40px;
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 20px;
+  background: radial-gradient(circle at 50% 120%, rgba(255,255,255,0.02) 0%, transparent 80%);
+  position: relative;
+}
+
+/* Table Surface */
+.desk-surface {
+  width: 100%;
+  height: 200px;
+  background: linear-gradient(180deg, var(--wood-light) 0%, var(--wood-dark) 100%);
+  border-top: 8px solid var(--wood-highlight);
+  position: relative;
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-end;
+  padding: 10px 40px 20px 40px;
+  gap: 20px;
+  box-shadow: inset 0 20px 20px rgba(0,0,0,0.4);
+}
+
+/* Desk Reflection when lamp is ON */
+.desk-surface::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(180deg, var(--desk-reflection) 0%, transparent 100%);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s ease;
+  z-index: 1;
+}
+
+body.lamp-on .desk-surface::after {
+  opacity: 1;
+}
+
+/* 1. Cozy Desk Lamp Widget */
+.widget-lamp {
+  position: relative;
+  width: 180px;
+  height: 280px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  z-index: 3;
+  margin-bottom: -18px; /* let it sit slightly down */
+}
+
+.lamp-svg {
+  width: 100%;
+  height: 100%;
+}
+
+.lamp-glow-src {
+  fill: #7f8c8d;
+  transition: fill 0.5s ease;
+}
+
+body.lamp-on .lamp-glow-src {
+  fill: var(--lamp-color);
+  filter: drop-shadow(0 0 15px var(--lamp-color));
+}
+
+.lamp-bulb {
+  cursor: pointer;
+}
+
+/* Small toggle switch on base of lamp */
+.lamp-switch {
+  width: 28px;
+  height: 16px;
+  background: #2d3748;
+  border-radius: 8px;
+  position: absolute;
+  bottom: 25px;
+  left: 50%;
+  transform: translateX(-50%);
+  cursor: pointer;
+  padding: 2px;
+  border: 1px solid rgba(255,255,255,0.1);
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.5);
+  z-index: 4;
+}
+
+.lamp-switch::after {
+  content: '';
+  display: block;
+  width: 10px;
+  height: 10px;
+  background: #cbd5e0;
+  border-radius: 50%;
+  transition: transform 0.3s ease, background 0.3s ease;
+}
+
+body.lamp-on .lamp-switch::after {
+  transform: translateX(12px);
+  background: var(--lamp-color);
+}
+
+/* 2. Interactive Retro Monitor Widget */
+.widget-monitor {
+  width: 140px;
+  height: 165px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  position: relative;
+  cursor: pointer;
+  transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  z-index: 2;
+  margin-bottom: 5px;
+}
+
+.widget-monitor:hover {
+  transform: scale(1.04) translateY(-2px);
+}
+
+.widget-monitor.rustle {
+  animation: monitor-shake 0.35s ease;
+}
+
+@keyframes monitor-shake {
+  0%, 100% { transform: rotate(0) translateY(0); }
+  25% { transform: rotate(-2deg) translateY(-2px); }
+  75% { transform: rotate(2deg) translateY(1px); }
+}
+
+.monitor-frame {
+  width: 125px;
+  height: 110px;
+  background: #3e3835;
+  border: 5px solid #2d2623;
+  border-radius: 12px;
+  padding: 5px;
+  box-shadow: inset 0 2px 5px rgba(255,255,255,0.1), 0 8px 16px rgba(0,0,0,0.4);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  box-sizing: border-box;
+}
+
+/* CRT Screen base styling */
+.monitor-screen {
+  flex-grow: 1;
+  background: #0d121a;
+  border: 2px solid #1a1512;
+  border-radius: 6px;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  box-shadow: inset 0 0 15px rgba(0,0,0,0.9);
+  animation: crt-flicker 0.2s infinite;
+}
+
+/* CRT Scanlines Overlay */
+.monitor-screen::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
+  background-size: 100% 3px;
+  pointer-events: none;
+  z-index: 4;
+  opacity: 0.8;
+}
+
+/* Glass glare reflection */
+.monitor-screen::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0) 60%, rgba(0,0,0,0.3) 100%);
+  pointer-events: none;
+  z-index: 5;
+}
+
+@keyframes crt-flicker {
+  0% { opacity: 0.98; }
+  50% { opacity: 1; }
+  100% { opacity: 0.99; }
+}
+
+.screen-content {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  box-sizing: border-box;
+  text-align: center;
+}
+
+/* Default Green Terminal Screen */
+.default-screen {
+  color: #64dfdf;
+  font-family: monospace;
+  font-size: 0.7rem;
+  line-height: 1.2;
+  text-shadow: 0 0 5px rgba(100, 223, 223, 0.7);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.screen-logo {
+  font-size: 1.5rem;
+  margin-bottom: 4px;
+  animation: logo-float 3s ease-in-out infinite alternate;
+}
+
+@keyframes logo-float {
+  0% { transform: translateY(0) scale(1); }
+  100% { transform: translateY(-3px) scale(1.05); }
+}
+
+.screen-text {
+  font-weight: bold;
+  letter-spacing: 0.5px;
+}
+
+/* Cute Message Screen style */
+.message-screen {
+  color: #ffb74d;
+  font-family: var(--font-header);
+  font-size: 0.75rem;
+  line-height: 1.3;
+  padding: 4px;
+  text-shadow: 0 0 5px rgba(255, 183, 77, 0.6);
+  justify-content: center;
+  align-items: center;
+}
+
+/* Photo Screen memory image display */
+.photo-screen {
+  background: #000;
+  position: relative;
+  padding: 0;
+  overflow: hidden;
+  justify-content: center;
+  align-items: center;
+}
+
+.photo-screen img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.photo-caption {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  background: rgba(0, 0, 0, 0.7);
+  color: #fff;
+  font-size: 0.58rem;
+  padding: 2px 4px;
+  font-family: var(--font-body);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  z-index: 3;
+}
+
+/* Monitor Bezels controls / Power LED */
+.monitor-controls {
+  height: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 5px;
+  background: #342e2b;
+  border-top: 1px solid rgba(0, 0, 0, 0.2);
+  border-radius: 0 0 8px 8px;
+}
+
+.power-led {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #81c784;
+  box-shadow: 0 0 5px #81c784;
+  transition: background 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Neck and Base of Monitor */
+.monitor-neck {
+  width: 22px;
+  height: 14px;
+  background: #2d2623;
+  box-shadow: inset 0 3px 6px rgba(0,0,0,0.5);
+  margin-top: -2px;
+  z-index: 1;
+}
+
+.monitor-base {
+  width: 60px;
+  height: 8px;
+  background: #3e3835;
+  border-radius: 6px 6px 0 0;
+  border-bottom: 2px solid var(--wood-highlight);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  z-index: 1;
+}
+
+/* 3. Sticky Note Widget (hanging on wall) */
+.widget-sticky {
+  width: 145px;
+  min-height: 145px;
+  background: #fffbe0;
+  color: #3e3323;
+  padding: 24px 12px 12px 12px;
+  box-shadow: 2px 8px 15px rgba(0,0,0,0.25);
+  position: relative;
+  z-index: 2;
+  transform-origin: top center;
+  animation: gentle-note-swing 5s ease-in-out infinite alternate;
+  cursor: pointer;
+  font-family: var(--font-handwritten);
+  font-size: 1.2rem;
+  line-height: 1.3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+@keyframes gentle-note-swing {
+  0% { transform: rotate(-3.5deg); }
+  100% { transform: rotate(1deg); }
+}
+
+.widget-sticky:hover {
+  transform: rotate(-1deg) translateY(-5px);
+  box-shadow: 2px 15px 25px rgba(0,0,0,0.4);
+}
+
+/* Sticky tape at the top */
+.widget-sticky::before {
+  content: '';
+  position: absolute;
+  top: -10px; left: 50%;
+  transform: translateX(-50%) rotate(-1deg);
+  width: 60px;
+  height: 18px;
+  background: rgba(245, 243, 225, 0.65); /* translucent warm tape */
+  backdrop-filter: blur(1px);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  border-left: 1px dashed rgba(0,0,0,0.08);
+  border-right: 1px dashed rgba(0,0,0,0.08);
+  z-index: 10;
+}
+
+.widget-sticky::after {
+  display: none;
+}
+
+.sticky-editor {
+  width: 100%;
+  height: 90px;
+  background: transparent;
+  border: none;
+  font-family: var(--font-handwritten);
+  font-size: 1.2rem;
+  color: #3e3323;
+  resize: none;
+  outline: none;
+  text-align: center;
+}
+
+/* 3b. Background Sticky Notes (Decorative side notes) */
+.widget-sticky-bg {
+  width: 115px;
+  min-height: 115px;
+  padding: 18px 8px 8px 8px;
+  font-size: 0.95rem;
+  opacity: 0.85;
+  z-index: 1;
+  cursor: default;
+}
+
+.widget-sticky-bg:hover {
+  opacity: 1;
+  transform: scale(1.05) translateY(-3px) !important;
+  z-index: 3;
+}
+
+.widget-sticky-bg::before {
+  width: 46px;
+  height: 14px;
+  top: -8px;
+}
+
+.sticky-bg-left {
+  background: #e2f0d9; /* soft sage pastel green */
+  color: #2c4230;
+  transform: rotate(-6deg);
+  animation: gentle-note-swing-left 6.5s ease-in-out infinite alternate;
+}
+
+.sticky-bg-right {
+  background: #fce4ec; /* soft pink pastel cherry */
+  color: #5c383e;
+  transform: rotate(5deg);
+  animation: gentle-note-swing-right 7.5s ease-in-out infinite alternate;
+}
+
+@keyframes gentle-note-swing-left {
+  0% { transform: rotate(-8deg); }
+  100% { transform: rotate(-4deg); }
+}
+
+@keyframes gentle-note-swing-right {
+  0% { transform: rotate(3deg); }
+  100% { transform: rotate(7deg); }
+}
+
+/* Disable uppercase for handwriting/sticky note and notebook elements */
+.widget-sticky,
+.widget-sticky-bg,
+.sticky-editor,
+#sticky-text-display,
+.widget-notebook,
+.notebook-title,
+.item-text,
+.notebook-input {
+  text-transform: none !important;
+}
+
+/* 4. Spiral Checklist Notebook */
+.widget-notebook {
+  width: 230px;
+  height: 180px;
+  background: #f7fafc;
+  color: #2d3748;
+  border-radius: 0 10px 10px 0;
+  box-shadow: 5px 12px 24px rgba(0,0,0,0.4);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  z-index: 2;
+  transform: rotate(-1deg);
+  transition: transform 0.3s ease;
+  margin-bottom: 5px;
+}
+
+.widget-notebook:hover {
+  transform: rotate(0deg) scale(1.02);
+}
+
+/* Spiral rings binding */
+.notebook-rings {
+  position: absolute;
+  top: 12px; bottom: 12px; left: -10px;
+  width: 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  z-index: 3;
+}
+
+.ring {
+  width: 16px;
+  height: 8px;
+  background: linear-gradient(180deg, #cbd5e0 0%, #718096 100%);
+  border-radius: 4px;
+  border: 1px solid #4a5568;
+}
+
+.notebook-content {
+  padding: 15px 15px 15px 25px; /* offset for rings */
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  font-family: var(--font-handwritten);
+}
+
+.notebook-title {
+  font-family: var(--font-handwritten);
+  font-size: 1.3rem;
+  font-weight: bold;
+  border-bottom: 2px solid #edf2f7;
+  padding-bottom: 4px;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #1a202c;
+}
+
+.notebook-list {
+  flex-grow: 1;
+  overflow-y: auto;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-right: 4px;
+}
+
+.notebook-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 1.05rem;
+  gap: 6px;
+}
+
+.item-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-grow: 1;
+}
+
+.item-left input[type="checkbox"] {
+  cursor: pointer;
+  accent-color: var(--accent-color);
+}
+
+.item-text {
+  cursor: pointer;
+  word-break: break-all;
+}
+
+.notebook-item.completed .item-text {
+  text-decoration: line-through;
+  color: #a0aec0;
+}
+
+.btn-delete-task {
+  background: none;
+  border: none;
+  color: #e53e3e;
+  cursor: pointer;
+  opacity: 0.4;
+  transition: opacity 0.3s ease;
+  font-size: 0.8rem;
+  padding: 2px;
+}
+
+.notebook-item:hover .btn-delete-task {
+  opacity: 1;
+}
+
+.notebook-input-area {
+  display: flex;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.notebook-input {
+  flex-grow: 1;
+  background: #edf2f7;
+  border: 1px solid #cbd5e0;
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 0.95rem;
+  color: #2d3748;
+  outline: none;
+  font-family: var(--font-handwritten);
+}
+
+.notebook-input:focus {
+  border-color: var(--accent-color);
+}
+
+.btn-add-task {
+  background: #cbd5e0;
+  border: none;
+  border-radius: 6px;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 0.95rem;
+  color: #2d3748;
+}
+
+.btn-add-task:hover {
+  background: var(--accent-color);
+  color: white;
+}
+
+/* 5. Retro Radio Music Widget */
+.widget-radio {
+  width: 210px;
+  height: 85px;
+  background: #2d3748;
+  border: 4px solid var(--wood-light);
+  border-radius: 12px;
+  box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+  display: flex;
+  flex-direction: column;
+  padding: 8px 12px;
+  color: #cbd5e0;
+  font-size: 0.7rem;
+  z-index: 2;
+  margin-bottom: -5px;
+  border-bottom-width: 6px;
+}
+
+.radio-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.radio-dial {
+  background: #1a202c;
+  border-radius: 4px;
+  padding: 3px 8px;
+  font-family: monospace;
+  color: #ffd880;
+  letter-spacing: 0.5px;
+  text-shadow: 0 0 5px rgba(255, 216, 128, 0.4);
+}
+
+.radio-speakers {
+  display: flex;
+  gap: 8px;
+  flex-grow: 1;
+}
+
+.speaker-grill {
+  width: 45px;
+  height: 45px;
+  background: radial-gradient(#1a202c 25%, transparent 26%), radial-gradient(#1a202c 25%, transparent 26%);
+  background-size: 4px 4px;
+  background-position: 0 0, 2px 2px;
+  border-radius: 50%;
+  border: 2px solid #4a5568;
+  flex-shrink: 0;
+}
+
+.radio-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex-grow: 1;
+  justify-content: center;
+}
+
+.radio-buttons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-play-radio {
+  background: #4a5568;
+  border: none;
+  color: white;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  font-size: 0.8rem;
+}
+
+.btn-play-radio:hover {
+  background: var(--accent-color);
+}
+
+.volume-slider-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+}
+
+.volume-slider-group label {
+  font-size: 0.65rem;
+  width: 24px;
+  color: var(--text-muted);
+}
+
+.volume-slider-group input[type="range"] {
+  flex-grow: 1;
+  height: 4px;
+  accent-color: var(--accent-color);
+  cursor: pointer;
+}
+
+/* EQ Visualizer */
+.radio-visualizer {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 25px;
+  width: 60px;
+  background: #1a202c;
+  border-radius: 4px;
+  padding: 3px;
+}
+
+.eq-bar {
+  flex-grow: 1;
+  width: 6px;
+  height: 2px;
+  background: var(--accent-color);
+  border-radius: 1px;
+}
+
+.playing .eq-bar {
+  animation: eq-bounce 1s infinite alternate;
+}
+
+.playing .eq-bar:nth-child(1) { animation-duration: 0.7s; animation-delay: 0.1s; }
+.playing .eq-bar:nth-child(2) { animation-duration: 0.5s; animation-delay: 0.3s; }
+.playing .eq-bar:nth-child(3) { animation-duration: 0.9s; animation-delay: 0.2s; }
+.playing .eq-bar:nth-child(4) { animation-duration: 0.6s; animation-delay: 0s; }
+.playing .eq-bar:nth-child(5) { animation-duration: 0.8s; animation-delay: 0.4s; }
+
+@keyframes eq-bounce {
+  0% { height: 2px; }
+  100% { height: 18px; }
+}
+
+/* Ambient shelf on the desk-wall */
+.desk-shelf {
+  position: absolute;
+  top: 25px; left: 10%; right: 10%;
+  height: 12px;
+  background: var(--wood-light);
+  border-radius: 4px;
+  border-bottom: 3px solid var(--wood-dark);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  z-index: 1;
+}
+
+/* Radio Volume Knob Styles */
+.radio-knob-container {
+  position: relative;
+  width: 24px;
+  height: 24px;
+  background: #1a202c;
+  border-radius: 50%;
+  border: 2px solid #4a5568;
+  cursor: pointer;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.5), 0 1px 2px rgba(255,255,255,0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.radio-knob-container:hover {
+  border-color: var(--accent-color);
+}
+
+.radio-knob-indicator {
+  width: 12px;
+  height: 12px;
+  background: radial-gradient(circle, #718096 0%, #4a5568 100%);
+  border-radius: 50%;
+  position: relative;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+}
+
+.radio-knob-indicator::after {
+  content: '';
+  position: absolute;
+  top: 1px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  height: 3px;
+  background: #cbd5e0;
+  border-radius: 1px;
+}
+
+.radio-knob-slider {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  z-index: 5;
+}
+
+/* Quick Journal Button below table (interactive flow) */
+.quick-journal-desk {
+  margin-top: 22px;
+  z-index: 5;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.quick-journal-desk button {
+  transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.25s ease;
+}
+
+.quick-journal-desk button:hover {
+  transform: scale(1.08) translateY(-2px);
+  box-shadow: 0 8px 16px rgba(0,0,0,0.25), var(--accent-glow);
+}
+
+.quick-journal-desk button:active {
+  transform: scale(0.94) translateY(1px);
+  box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+  background-color: var(--wood-highlight);
+}
+
+/* Responsive Desk Setup (Phone/Tablet view) */
+@media (max-width: 768px) {
+  .desk-wall {
+    min-height: auto;
+    padding: 20px 10px;
+    flex-direction: row;
+    justify-content: center;
+    gap: 12px;
+  }
+
+  .widget-sticky {
+    width: 105px;
+    min-height: 105px;
+    font-size: 0.9rem;
+    padding: 16px 8px 8px 8px;
+  }
+  .widget-sticky::before {
+    width: 44px;
+    height: 14px;
+    top: -8px;
+  }
+  
+  .widget-sticky-bg {
+    width: 85px;
+    min-height: 85px;
+    font-size: 0.7rem;
+    padding: 14px 6px 6px 6px;
+  }
+  .widget-sticky-bg::before {
+    width: 36px;
+    height: 10px;
+    top: -6px;
+  }
+
+  .desk-surface {
+    height: auto;
+    min-height: auto;
+    flex-wrap: wrap;
+    padding: 30px 15px;
+    gap: 20px;
+    justify-content: center;
+    align-items: flex-end;
+  }
+
+  .widget-lamp {
+    width: 155px;
+    height: 240px;
+    margin-bottom: -15px;
+  }
+
+  .widget-monitor {
+    width: 130px;
+    height: 155px;
+    margin-bottom: 2px;
+  }
+
+  .monitor-frame {
+    width: 118px;
+    height: 100px;
+    padding: 4px;
+    border-width: 4px;
+  }
+
+  .monitor-neck {
+    width: 18px;
+    height: 12px;
+  }
+
+  .monitor-base {
+    width: 52px;
+    height: 7px;
+  }
+
+  .default-screen {
+    font-size: 0.65rem;
+  }
+
+  .screen-logo {
+    font-size: 1.3rem;
+    margin-bottom: 3px;
+  }
+
+  .message-screen {
+    font-size: 0.68rem;
+  }
+
+  .photo-caption {
+    font-size: 0.55rem;
+    padding: 2px 3px;
+  }
+
+  .widget-radio {
+    width: 190px;
+    height: 85px;
+    margin-bottom: -3px;
+  }
+
+  .radio-visualizer {
+    display: none !important;
+  }
+
+  .widget-notebook {
+    width: 100%;
+    max-width: 280px;
+    height: 170px;
+    margin-bottom: 2px;
+  }
+}
+
+@media (max-width: 480px) {
+  .desk-wall {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  
+  .widget-sticky {
+    width: 95px;
+    min-height: 95px;
+    font-size: 0.8rem;
+  }
+  
+  .widget-sticky-bg {
+    width: 80px;
+    min-height: 80px;
+    font-size: 0.65rem;
+  }
+}

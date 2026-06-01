@@ -1,0 +1,159 @@
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Fredoka:wght@400;500;700&family=Playfair+Display:ital,wght@0,500;0,700;1,400&family=Quicksand:wght@400;500;600;700&display=swap');
+
+@font-face {
+  font-family: 'Yona';
+  src: url('yona.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Jelek Type';
+  src: url('Jelek Type.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Atfagis';
+  src: url('../fonts/Atfagis.woff2') format('woff2'),
+       url('../fonts/Atfagis.woff') format('woff'),
+       url('../fonts/Atfagis.ttf') format('truetype'),
+       url('Atfagis.ttf') format('truetype'),
+       url('../Atfagis.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Nordigh';
+  src: url('../fonts/Nordigh.woff2') format('woff2'),
+       url('../fonts/Nordigh.woff') format('woff'),
+       url('../fonts/Nordigh.ttf') format('truetype'),
+       url('Nordigh.ttf') format('truetype'),
+       url('../Nordigh.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+:root {
+  /* Font Family definitions */
+  --font-header: 'Yona', 'Atfagis', 'Nordigh', 'Playfair Display', 'Fredoka', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-body: 'Yona', 'Atfagis', 'Nordigh', 'Quicksand', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-handwritten: 'Jelek Type', 'Caveat', cursive, sans-serif;
+
+  /* Standard Mood Colors */
+  --mood-joyful: #ffd166;
+  --mood-cozy: #a3c4bc;
+  --mood-blue: #8fa6cb;
+  --mood-stormy: #6c757d;
+  --mood-loving: #ffb3c1;
+
+  /* Default theme values (mapped dynamically to active theme) */
+  --bg-gradient: linear-gradient(135deg, #0b1a13 0%, #173024 100%);
+  --wood-light: #5c3a21;
+  --wood-dark: #3d2314;
+  --wood-highlight: #7c4e2e;
+  
+  --desk-reflection: rgba(255, 232, 161, 0.08);
+  --text-main: #f0f3f5;
+  --text-muted: #a0aec0;
+  --panel-bg: rgba(23, 40, 32, 0.45);
+  --panel-border: rgba(255, 255, 255, 0.08);
+  --panel-shadow: rgba(0, 0, 0, 0.4);
+  
+  --lamp-glow: 0 0 40px 10px rgba(255, 230, 150, 0.2);
+  --lamp-color: #ffd880;
+  --lamp-glow-overlay: radial-gradient(circle 500px at 50% 30%, rgba(255, 220, 120, 0.12) 0%, transparent 100%);
+  
+  --accent-color: #88a087;
+  --accent-glow: 0 0 10px rgba(136, 160, 135, 0.4);
+}
+
+/* 1. FOREST VIBES (Deep green, rich dark cedar, firefly lights) */
+.theme-forest {
+  --bg-gradient: linear-gradient(135deg, #07120e 0%, #12281d 100%);
+  --wood-light: #52341d;
+  --wood-dark: #331d0e;
+  --wood-highlight: #6e4526;
+  
+  --desk-reflection: rgba(255, 235, 170, 0.07);
+  --text-main: #e2e8f0;
+  --text-muted: #94a3b8;
+  --panel-bg: rgba(13, 29, 21, 0.55);
+  --panel-border: rgba(255, 255, 255, 0.06);
+  --panel-shadow: rgba(0, 0, 0, 0.5);
+  
+  --lamp-glow: 0 0 60px 15px rgba(255, 225, 130, 0.25);
+  --lamp-color: #ffe699;
+  --lamp-glow-overlay: radial-gradient(circle 600px at var(--lamp-x, 25%) var(--lamp-y, 45%), rgba(255, 220, 120, 0.14) 0%, rgba(255, 220, 120, 0.03) 50%, transparent 100%);
+  
+  --accent-color: #92bfa3;
+  --accent-glow: 0 0 12px rgba(146, 191, 163, 0.35);
+}
+
+/* 2. SOFT CHERRY BLOSSOM (Sakura pink twilight, pale wood, glowing lantern) */
+.theme-cherry {
+  --bg-gradient: linear-gradient(135deg, #18111e 0%, #2f1d2a 100%);
+  --wood-light: #80565d;
+  --wood-dark: #5c383e;
+  --wood-highlight: #996e76;
+  
+  --desk-reflection: rgba(255, 210, 220, 0.09);
+  --text-main: #fbeef2;
+  --text-muted: #d0b6c2;
+  --panel-bg: rgba(33, 19, 28, 0.5);
+  --panel-border: rgba(255, 182, 193, 0.08);
+  --panel-shadow: rgba(0, 0, 0, 0.45);
+  
+  --lamp-glow: 0 0 50px 12px rgba(255, 215, 225, 0.25);
+  --lamp-color: #ffeef2;
+  --lamp-glow-overlay: radial-gradient(circle 600px at var(--lamp-x, 25%) var(--lamp-y, 45%), rgba(255, 200, 215, 0.15) 0%, rgba(255, 200, 215, 0.04) 50%, transparent 100%);
+  
+  --accent-color: #ffb3c1;
+  --accent-glow: 0 0 12px rgba(255, 179, 193, 0.4);
+}
+
+/* 3. SUNSET DUSK (Deep indigo into orange-red, rich mahogany, blazing sunset lantern) */
+.theme-sunset {
+  --bg-gradient: linear-gradient(135deg, #0b091a 0%, #201126 50%, #441829 100%);
+  --wood-light: #6e2a1b;
+  --wood-dark: #47190f;
+  --wood-highlight: #8a3724;
+  
+  --desk-reflection: rgba(255, 180, 110, 0.1);
+  --text-main: #fdf2f0;
+  --text-muted: #cfa8a2;
+  --panel-bg: rgba(31, 16, 29, 0.55);
+  --panel-border: rgba(247, 160, 114, 0.07);
+  --panel-shadow: rgba(0, 0, 0, 0.5);
+  
+  --lamp-glow: 0 0 70px 18px rgba(255, 170, 90, 0.3);
+  --lamp-color: #ffb875;
+  --lamp-glow-overlay: radial-gradient(circle 600px at var(--lamp-x, 25%) var(--lamp-y, 45%), rgba(255, 170, 90, 0.18) 0%, rgba(255, 170, 90, 0.05) 50%, transparent 100%);
+  
+  --accent-color: #f7a072;
+  --accent-glow: 0 0 12px rgba(247, 160, 114, 0.4);
+}
+
+/* 4. NIGHT COFFEE (Dark espresso, rich dark chocolate table, warm vintage filament bulb) */
+.theme-coffee {
+  --bg-gradient: linear-gradient(135deg, #090605 0%, #1a100b 100%);
+  --wood-light: #42291b;
+  --wood-dark: #24140b;
+  --wood-highlight: #5c3c2a;
+  
+  --desk-reflection: rgba(255, 238, 194, 0.08);
+  --text-main: #f5efe6;
+  --text-muted: #bfb0a3;
+  --panel-bg: rgba(24, 15, 11, 0.6);
+  --panel-border: rgba(255, 255, 255, 0.05);
+  --panel-shadow: rgba(0, 0, 0, 0.6);
+  
+  --lamp-glow: 0 0 55px 15px rgba(255, 215, 140, 0.28);
+  --lamp-color: #ffdf9e;
+  --lamp-glow-overlay: radial-gradient(circle 600px at var(--lamp-x, 25%) var(--lamp-y, 45%), rgba(255, 215, 140, 0.16) 0%, rgba(255, 215, 140, 0.04) 50%, transparent 100%);
+  
+  --accent-color: #ddb892;
+  --accent-glow: 0 0 10px rgba(221, 184, 146, 0.35);
+}

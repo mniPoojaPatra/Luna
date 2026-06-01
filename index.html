@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Luna ✦ Cozy Night Journal</title>
+  <meta name="description" content="A warm, soft sanctuary for your thoughts. Classify your mood, attach stamp photos, and grow with cozy reflection.">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/auth.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/journal.css">
+  <link rel="stylesheet" href="css/memory-wall.css">
+  <link rel="stylesheet" href="css/calendar.css">
+</head>
+<body class="theme-forest">
+
+  <!-- Ambient Particles Background -->
+  <div class="particles-container" id="ambient-particles">
+    <div class="particle" style="left: 10%; width: 6px; height: 6px; animation-delay: 0s; animation-duration: 12s;"></div>
+    <div class="particle" style="left: 25%; width: 10px; height: 10px; animation-delay: 2s; animation-duration: 18s;"></div>
+    <div class="particle" style="left: 45%; width: 4px; height: 4px; animation-delay: 5s; animation-duration: 10s;"></div>
+    <div class="particle" style="left: 65%; width: 8px; height: 8px; animation-delay: 1s; animation-duration: 14s;"></div>
+    <div class="particle" style="left: 80%; width: 5px; height: 5px; animation-delay: 3s; animation-duration: 16s;"></div>
+    <div class="particle" style="left: 92%; width: 12px; height: 12px; animation-delay: 7s; animation-duration: 20s;"></div>
+  </div>
+
+  <!-- Floating Glass Shelf Header Navigation -->
+  <header id="app-header">
+    <div class="logo-section">
+      <span class="logo-icon">🌙</span>
+      <span>luna</span>
+    </div>
+    
+    <nav>
+      <ul class="nav-links">
+        <li class="active"><a data-target="view-dashboard">desk</a></li>
+        <li><a data-target="view-memory-wall">wall</a></li>
+        <li><a data-target="view-calendar">calendar</a></li>
+      </ul>
+    </nav>
+
+    <!-- Theme switch + Logout -->
+    <div class="theme-selector-container">
+      <button class="theme-btn active" data-theme="theme-forest" title="Forest Vibes">🌲</button>
+      <button class="theme-btn" data-theme="theme-cherry" title="Soft Cherry Blossom">🌸</button>
+      <button class="theme-btn" data-theme="theme-sunset" title="Sunset Dusk">🌇</button>
+      <button class="theme-btn" data-theme="theme-coffee" title="Night Coffee">☕</button>
+      <button class="btn-logout" id="logout-btn">log out</button>
+    </div>
+  </header>
+
+  <!-- Main Views Container -->
+  <main>
+    
+    <!-- 1. AUTH SCREEN VIEW (Active by default) -->
+    <section id="view-login" class="view-section active">
+      <div class="auth-container">
+        
+        <!-- Login Panel -->
+        <div id="auth-panel-login">
+          <span class="auth-logo">🌙</span>
+          <h2 class="auth-title">welcome to luna</h2>
+          <p class="auth-subtitle">your cozy nightly sanctuary</p>
+          
+          <div id="login-alert" class="auth-alert"></div>
+          
+          <form id="login-form" class="auth-form">
+            <div class="input-group">
+              <label for="login-username">username</label>
+              <input type="text" id="login-username" class="cozy-input" placeholder="enter your name" required autocomplete="username">
+            </div>
+            <div class="input-group">
+              <label for="login-password">passcode</label>
+              <input type="password" id="login-password" class="cozy-input" placeholder="••••" required autocomplete="current-password">
+            </div>
+            <button type="submit" class="cozy-btn" style="justify-content: center; margin-top: 10px;">step inside</button>
+          </form>
+          
+          <div class="auth-options">
+            new here? <a id="link-show-signup" class="auth-link">create a space</a>
+          </div>
+        </div>
+
+        <!-- Sign Up Panel (Hidden by default) -->
+        <div id="auth-panel-signup" style="display: none;">
+          <span class="auth-logo">✨</span>
+          <h2 class="auth-title">create a space</h2>
+          <p class="auth-subtitle">begin your reflective journey</p>
+          
+          <div id="signup-alert" class="auth-alert"></div>
+          
+          <form id="signup-form" class="auth-form">
+            <div class="input-group">
+              <label for="signup-username">username</label>
+              <input type="text" id="signup-username" class="cozy-input" placeholder="choose a username" required autocomplete="username">
+            </div>
+            <div class="input-group">
+              <label for="signup-password">passcode</label>
+              <input type="password" id="signup-password" class="cozy-input" placeholder="at least 4 characters" required autocomplete="new-password">
+            </div>
+            <div class="input-group">
+              <label for="signup-confirm-password">confirm passcode</label>
+              <input type="password" id="signup-confirm-password" class="cozy-input" placeholder="re-enter passcode" required autocomplete="new-password">
+            </div>
+            <button type="submit" class="cozy-btn" style="justify-content: center; margin-top: 10px;">forge space</button>
+          </form>
+          
+          <div class="auth-options">
+            already have a space? <a id="link-show-login" class="auth-link">log in</a>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- 2. DASHBOARD VIEW (Desktop Desk Setup) -->
+    <section id="view-dashboard" class="view-section">
+      <div class="dashboard-wrapper">
+        <div class="dashboard-header">
+          <h2 id="dashboard-welcome">good evening, dreamer</h2>
+          <p>take a moment to ground yourself</p>
+        </div>
+
+        <!-- The Desk Workspace -->
+        <div class="desk-setup">
+          
+          <!-- Shelf on the wall -->
+          <div class="desk-shelf"></div>
+
+          <!-- Wall area (Note, pushpins) -->
+          <div class="desk-wall">
+            <!-- Left Background Sticky Note -->
+            <div class="widget-sticky widget-sticky-bg sticky-bg-left" id="dashboard-sticky-left" title="Click to edit your quote">
+              <span id="sticky-left-text-display">be gentle with yourself 🌸</span>
+            </div>
+
+            <!-- Pinned Sticky Note Quote -->
+            <div class="widget-sticky" id="dashboard-sticky" title="Click to edit your quote">
+              <span id="sticky-text-display">Cherish yourself, because you are worth it.</span>
+            </div>
+
+            <!-- Right Background Sticky Note -->
+            <div class="widget-sticky widget-sticky-bg sticky-bg-right" id="dashboard-sticky-right" title="Click to edit your quote">
+              <span id="sticky-right-text-display">grow at your own pace 🌱</span>
+            </div>
+          </div>
+
+          <!-- Wooden Table Top (Widgets sit here) -->
+          <div class="desk-surface">
+            
+            <!-- A. Dynamic Desk Lamp -->
+            <div class="widget-lamp" id="desk-lamp-widget" title="Click lamp to toggle light">
+              <svg class="lamp-svg" viewBox="0 0 120 200" xmlns="http://www.w3.org/2000/svg">
+                <!-- Base -->
+                <path d="M30,180 L90,180 C90,180 95,190 90,195 L30,195 C25,190 30,180 30,180 Z" fill="#2d3748" stroke="#1a202c" stroke-width="2"/>
+                <!-- Neck -->
+                <path d="M60,180 Q40,120 70,80" fill="none" stroke="#4a5568" stroke-width="6" stroke-linecap="round"/>
+                <path d="M60,180 Q40,120 70,80" fill="none" stroke="#718096" stroke-width="2" stroke-linecap="round"/>
+                <!-- Shade connector -->
+                <circle cx="70" cy="80" r="6" fill="#cbd5e0" stroke="#4a5568" stroke-width="1.5"/>
+                <!-- Glow Bulb backdrop -->
+                <circle cx="68" cy="110" r="14" class="lamp-glow-src"/>
+                <!-- Shade -->
+                <path d="M45,95 L95,95 L105,120 L35,120 Z" fill="#2d3748" stroke="#1a202c" stroke-width="2" class="lamp-bulb"/>
+              </svg>
+            </div>
+
+            <!-- B. Retro Radio Cassette (Ambient Audio Synth) -->
+            <div class="widget-radio" id="retro-radio">
+              <div class="radio-top">
+                <span style="font-weight:700; letter-spacing:0.5px;">📻 LUNA FM</span>
+                <span class="radio-dial" id="radio-frequency">94.3 MHz</span>
+              </div>
+              <div class="radio-speakers">
+                <div class="speaker-grill"></div>
+                <div class="radio-controls">
+                  <div class="radio-buttons">
+                    <button class="btn-play-radio" id="radio-play-btn" title="Toggle Ambience">▶</button>
+                    
+                    <!-- Volume Knob -->
+                    <div class="radio-knob-container" title="Volume Dial">
+                      <input type="range" id="radio-volume-knob" min="0" max="1" step="0.05" value="0.5" class="radio-knob-slider">
+                      <div class="radio-knob-indicator" id="radio-knob-rotator" style="transform: rotate(0deg);"></div>
+                    </div>
+
+                    <!-- Equalizer Bars -->
+                    <div class="radio-visualizer">
+                      <div class="eq-bar"></div>
+                      <div class="eq-bar"></div>
+                      <div class="eq-bar"></div>
+                      <div class="eq-bar"></div>
+                      <div class="eq-bar"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- C. Interactive Retro Monitor Widget -->
+            <div class="widget-monitor" id="desk-monitor-widget" title="Click to interact with the screen">
+              <div class="monitor-frame">
+                <div class="monitor-screen" id="monitor-screen-display">
+                  <!-- Default Screen: Cozy Moon & Stars -->
+                  <div class="screen-content default-screen" id="screen-default">
+                    <span class="screen-logo">🌙</span>
+                    <span class="screen-text">LUNA OS v1.0</span>
+                  </div>
+                  <!-- Message Screen (hidden by default) -->
+                  <div class="screen-content message-screen" id="screen-message" style="display: none;">
+                    <p id="monitor-cute-message">You are doing great, dreamer! ✦</p>
+                  </div>
+                  <!-- Photo Screen (hidden by default) -->
+                  <div class="screen-content photo-screen" id="screen-photo" style="display: none;">
+                    <img id="monitor-memory-img" src="" alt="Recent Memory">
+                    <span class="photo-caption" id="monitor-memory-date">May 31</span>
+                  </div>
+                </div>
+                <!-- Bezel control buttons -->
+                <div class="monitor-controls">
+                  <span class="power-led"></span>
+                </div>
+              </div>
+              <!-- Monitor Stand -->
+              <div class="monitor-neck"></div>
+              <div class="monitor-base"></div>
+            </div>
+
+            <!-- D. Spiral Checklist Notebook (Tasks) -->
+            <div class="widget-notebook" id="notebook-widget">
+              <div class="notebook-rings">
+                <div class="ring"></div>
+                <div class="ring"></div>
+                <div class="ring"></div>
+                <div class="ring"></div>
+                <div class="ring"></div>
+              </div>
+              <div class="notebook-content">
+                <div class="notebook-title">
+                  <span>To-Do List</span>
+                  <span style="font-size:0.75rem; color:#718096;" id="notebook-count">0 completed</span>
+                </div>
+                <ul class="notebook-list" id="todo-list">
+                  <!-- Injected via JavaScript -->
+                </ul>
+                <form id="todo-form" class="notebook-input-area">
+                  <input type="text" id="todo-input" class="notebook-input" placeholder="New task..." maxlength="26" required autocomplete="off">
+                  <button type="submit" class="btn-add-task">+</button>
+                </form>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- Quick Write Button below table (interactive flow) -->
+        <div class="quick-journal-desk">
+          <button class="cozy-btn" id="btn-quick-journal">
+            <span>✍️ Write a Memory</span>
+          </button>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- 3. MEMORY WALL VIEW (Zoomed-out Clip Grid) -->
+    <section id="view-memory-wall" class="view-section">
+      <div class="memory-wall-container">
+        
+        <div class="memory-wall-header">
+          <div class="memory-wall-info">
+            <h2>memory pegboard</h2>
+            <p>your gallery of moments, preserved in time</p>
+          </div>
+          
+          <div class="wall-controls">
+            <!-- Mood legends -->
+            <div class="mood-legend">
+              <div class="legend-item"><span class="legend-dot" style="background:var(--mood-joyful);"></span> <span>Joyful</span></div>
+              <div class="legend-item"><span class="legend-dot" style="background:var(--mood-cozy);"></span> <span>Cozy</span></div>
+              <div class="legend-item"><span class="legend-dot" style="background:var(--mood-blue);"></span> <span>Blue</span></div>
+              <div class="legend-item"><span class="legend-dot" style="background:var(--mood-stormy);"></span> <span>Stormy</span></div>
+              <div class="legend-item"><span class="legend-dot" style="background:var(--mood-loving);"></span> <span>Loving</span></div>
+            </div>
+            
+            <button class="cozy-btn cozy-btn-secondary" id="btn-toggle-zoom">
+              <span id="zoom-btn-text">🔍 Zoom In</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- The Pegboard Grid -->
+        <div class="pegboard-wall">
+          <div class="memory-grid zoomed-out" id="memory-peg-board">
+            <!-- Cells generated dynamically (6x6 or more) -->
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- 4. CALENDAR & SELF-CARE STATS VIEW -->
+    <section id="view-calendar" class="view-section">
+      <div class="calendar-wrapper">
+        
+        <!-- Left: Full calendar grid card -->
+        <div class="calendar-card">
+          <div class="calendar-header">
+            <span class="calendar-nav-title" id="calendar-month-year">May 2026</span>
+            <div class="calendar-nav-btns">
+              <button class="calendar-nav-btn" id="btn-calendar-prev">◀</button>
+              <button class="calendar-nav-btn" id="btn-calendar-next">▶</button>
+            </div>
+          </div>
+
+          <div class="calendar-days-labels">
+            <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+          </div>
+
+          <div class="calendar-grid" id="calendar-days-grid">
+            <!-- Date cells injected dynamically -->
+          </div>
+        </div>
+
+        <!-- Right: Stats and Self-Care Breathing Guide -->
+        <div class="calendar-sidebar">
+          
+          <!-- Statistics details -->
+          <div class="sidebar-panel">
+            <h3>Reflections Log</h3>
+            <div class="stats-cards">
+              <div class="stat-card">
+                <div class="stat-val" id="stat-total-entries">0</div>
+                <div class="stat-lbl">total journals</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-val" id="stat-streak">0</div>
+                <div class="stat-lbl">day streak</div>
+              </div>
+            </div>
+
+            <!-- Mood tracker chart/bars -->
+            <div style="margin-top: 10px;">
+              <h4 style="font-size:0.9rem; color:var(--text-muted); margin-bottom:12px;">mood breakdown</h4>
+              <div class="mood-dist-bars" id="mood-breakdown-bars">
+                <!-- Bar rows injected dynamically -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Self Care Breathing Ballon Widget -->
+          <div class="sidebar-panel">
+            <h3>ground yourself</h3>
+            <div class="breathing-box">
+              <div class="breathing-circle-outer">
+                <div class="breathing-circle" id="breath-circle">
+                  Inhale
+                </div>
+              </div>
+              <div class="breathing-text" id="breath-instruction">breathe with me</div>
+              <button class="cozy-btn cozy-btn-secondary btn-breathe-toggle" id="btn-breathe-control">
+                <span>Start Breathing</span>
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ==================== MODALS ==================== -->
+
+  <!-- A. JOURNAL WRITER/CREATOR MODAL (Dual Page Notebook) -->
+  <div class="cozy-modal" id="modal-journal-editor">
+    <div class="modal-content" style="max-width: 800px;">
+      <button class="modal-close" id="btn-close-editor">&times;</button>
+      
+      <div class="notebook-container">
+        
+        <!-- Left notebook page (Date, Mood, Photo stamp) -->
+        <div class="notebook-page">
+          <h3>📅 Date & Mood</h3>
+          
+          <div class="input-group">
+            <label for="journal-date" style="color: #635850;">Select Date</label>
+            <input type="date" id="journal-date" class="cozy-input" style="background: rgba(0,0,0,0.04); color: #2c251e; border-color: #eae6db;">
+          </div>
+
+          <div class="input-group">
+            <label style="color: #635850;">How do you feel?</label>
+            <div class="mood-picker-group">
+              <div class="mood-option" data-mood="joyful" style="--mood-color: var(--mood-joyful);">
+                <div class="mood-color-circle" style="background: var(--mood-joyful);"></div>
+                <span class="mood-label">joyful</span>
+              </div>
+              <div class="mood-option" data-mood="cozy" style="--mood-color: var(--mood-cozy);">
+                <div class="mood-color-circle" style="background: var(--mood-cozy);"></div>
+                <span class="mood-label">cozy</span>
+              </div>
+              <div class="mood-option" data-mood="blue" style="--mood-color: var(--mood-blue);">
+                <div class="mood-color-circle" style="background: var(--mood-blue);"></div>
+                <span class="mood-label">blue</span>
+              </div>
+              <div class="mood-option" data-mood="stormy" style="--mood-color: var(--mood-stormy);">
+                <div class="mood-color-circle" style="background: var(--mood-stormy);"></div>
+                <span class="mood-label">stormy</span>
+              </div>
+              <div class="mood-option" data-mood="loving" style="--mood-color: var(--mood-loving);">
+                <div class="mood-color-circle" style="background: var(--mood-loving);"></div>
+                <span class="mood-label">loving</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Perforated Stamp Component -->
+          <div class="stamp-card-creator">
+            <label style="color: #635850; font-family: var(--font-header); font-size: 0.9rem;">Represent your day</label>
+            
+            <div class="stamp-card" id="editor-stamp-card">
+              <div class="stamp-media-box" id="stamp-capture-box">
+                <!-- Video stream or Image element goes here -->
+                <div class="stamp-media-placeholder" id="stamp-media-placeholder">
+                  <i>📸</i>
+                  <span>Add a daily photo<br><small>Click to upload or capture</small></span>
+                </div>
+              </div>
+              <div class="stamp-date" id="stamp-card-date">May 31, 2026</div>
+            </div>
+            
+            <div class="camera-controls" id="camera-controls-row" style="display: none;">
+              <button class="camera-btn" id="btn-snap-photo">📸 Capture</button>
+              <button class="camera-btn" id="btn-cancel-camera">Cancel</button>
+            </div>
+
+            <!-- Hidden File Input -->
+            <input type="file" id="journal-photo-uploader" accept="image/*" style="display: none;">
+          </div>
+        </div>
+
+        <!-- Right notebook page (Self-reflections & Text write space) -->
+        <div class="notebook-page">
+          <h3>✍️ Reflections</h3>
+          
+          <div class="structured-reflection">
+            <div class="reflection-box good">
+              <label>🌸 A beautiful moment</label>
+              <textarea id="reflection-good" placeholder="something good that happened..."></textarea>
+            </div>
+            
+            <div class="reflection-box upset">
+              <label>🌧️ A gentle storm</label>
+              <textarea id="reflection-upset" placeholder="something that upset you..."></textarea>
+            </div>
+            
+            <div class="reflection-box improve">
+              <label>🌱 A seed of growth</label>
+              <textarea id="reflection-improve" placeholder="something you could've done better..."></textarea>
+            </div>
+          </div>
+
+          <div class="input-group">
+            <label for="journal-diary" style="color: #635850;">Write about your day</label>
+            <textarea id="journal-diary" class="diary-textarea" placeholder="Dear diary, today was..."></textarea>
+          </div>
+
+          <div class="journal-form-actions">
+            <button class="cozy-btn cozy-btn-secondary" id="btn-cancel-journal" style="background:#eae6db; color:#4a3e3d; border-color:#dcd7c9;">Cancel</button>
+            <button class="cozy-btn" id="btn-save-journal">💾 Save Memory</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- B. DETAILED JOURNAL VIEWER MODAL (Hanging Card Inspection) -->
+  <div class="cozy-modal" id="modal-journal-viewer">
+    <div class="modal-content" style="max-width: 650px;">
+      <button class="modal-close" id="btn-close-viewer">&times;</button>
+      
+      <div class="view-modal-header">
+        <div class="view-modal-title">
+          <span style="font-size:1.8rem;" id="viewer-title-icon">📓</span>
+          <div>
+            <h3 id="viewer-date" style="color:var(--text-main); font-size:1.4rem;">May 31, 2026</h3>
+            <span class="view-modal-mood-badge" id="viewer-mood" style="background:var(--mood-joyful);">joyful</span>
+          </div>
+        </div>
+        <div style="display:flex; gap:8px;">
+          <button class="cozy-btn cozy-btn-secondary" id="btn-edit-memory" style="padding: 6px 12px; font-size: 0.85rem;">✏️ Edit</button>
+          <button class="cozy-btn cozy-btn-secondary" id="btn-delete-memory" style="padding: 6px 12px; font-size: 0.85rem; background: rgba(239, 68, 68, 0.15); border-color: rgba(239, 68, 68, 0.2); color:#fca5a5;">🗑️ Delete</button>
+        </div>
+      </div>
+
+      <div class="view-modal-grid">
+        <!-- Left: Stamp Card -->
+        <div class="view-modal-left">
+          <div class="view-modal-stamp" id="viewer-stamp-card">
+            <!-- image injected via JS -->
+            <div id="viewer-image-container"></div>
+            <div class="stamp-date" id="viewer-stamp-date">May 31, 2026</div>
+          </div>
+        </div>
+
+        <!-- Right: Text entries -->
+        <div class="view-modal-right">
+          <div>
+            <h4 style="font-size:0.85rem; color:var(--text-muted); margin-bottom:6px;">thoughts</h4>
+            <div class="view-modal-text" id="viewer-diary-text">
+              Dear diary, today was...
+            </div>
+          </div>
+
+          <div class="view-modal-prompts">
+            <div class="view-modal-prompt-item good" id="viewer-prompt-good-box">
+              <h4>🌸 beautiful moment</h4>
+              <p id="viewer-prompt-good">Something good</p>
+            </div>
+            <div class="view-modal-prompt-item upset" id="viewer-prompt-upset-box">
+              <h4>🌧️ gentle storm</h4>
+              <p id="viewer-prompt-upset">Something upset</p>
+            </div>
+            <div class="view-modal-prompt-item improve" id="viewer-prompt-improve-box">
+              <h4>🌱 seed of growth</h4>
+              <p id="viewer-prompt-improve">Something better</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- A modal or file selection menu for stamp media source -->
+  <div class="cozy-modal" id="modal-media-choice" style="z-index: 105;">
+    <div class="modal-content" style="max-width: 320px; text-align: center; padding: 24px;">
+      <button class="modal-close" id="btn-close-media-choice">&times;</button>
+      <h3 style="font-size: 1.2rem; color: var(--text-main); margin-bottom: 18px;">Represent Your Day</h3>
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <button class="cozy-btn" id="btn-choice-camera" style="justify-content: center;">📷 Take Live Photo</button>
+        <button class="cozy-btn cozy-btn-secondary" id="btn-choice-upload" style="justify-content: center;">📁 Upload Image</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Module Script Injection -->
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
