@@ -37,7 +37,7 @@ const Auth = {
 
     // Submit handlers
     if (loginForm) {
-      loginForm.addEventListener('submit', (e) => {
+      loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const userVal = document.getElementById('login-username').value;
         const passVal = document.getElementById('login-password').value;
@@ -48,7 +48,7 @@ const Auth = {
           return;
         }
 
-        const res = DB.authenticateUser(userVal, passVal);
+        const res = await DB.authenticateUser(userVal, passVal);
         if (res.success) {
           loginForm.reset();
           if (this.onLoginSuccess) this.onLoginSuccess(userVal);
@@ -59,7 +59,7 @@ const Auth = {
     }
 
     if (signupForm) {
-      signupForm.addEventListener('submit', (e) => {
+      signupForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const userVal = document.getElementById('signup-username').value;
         const passVal = document.getElementById('signup-password').value;
@@ -86,7 +86,7 @@ const Auth = {
           return;
         }
 
-        const res = DB.registerUser(userVal, passVal);
+        const res = await DB.registerUser(userVal, passVal);
         if (res.success) {
           this.showAlert(alertBox, 'Account created! Switching to Login...', 'success');
           signupForm.reset();

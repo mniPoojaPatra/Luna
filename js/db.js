@@ -4,25 +4,68 @@ const DB = {
     return JSON.parse(localStorage.getItem('luna_users') || '{}');
   },
 
-  registerUser(username, password) {
+  // Helper to hash password using SHA-256
+  async hashPassword(password, salt) {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(password + salt);
+    const hashBuffer = await window.crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  },
+
+  // Helper to generate a random salt
+  generateSalt() {
+    const saltArray = new Uint8Array(16);
+    window.crypto.getRandomValues(saltArray);
+    return Array.from(saltArray).map(b => b.toString(16).padStart(2, '0')).join('');
+  },
+
+  async registerUser(username, password) {
     const users = this.getUsers();
     const cleanUser = username.trim().toLowerCase();
     if (users[cleanUser]) {
       return { success: false, message: 'Username already exists' };
     }
+    const salt = this.generateSalt();
+    const hash = await this.hashPassword(password, salt);
     users[cleanUser] = {
       username: username.trim(),
-      password: password // simple hash or string comparison for client-side sandbox
+      salt: salt,
+      passwordHash: hash
     };
     localStorage.setItem('luna_users', JSON.stringify(users));
     return { success: true };
   },
 
-  authenticateUser(username, password) {
+  async authenticateUser(username, password) {
     const users = this.getUsers();
     const cleanUser = username.trim().toLowerCase();
-    if (users[cleanUser] && users[cleanUser].password === password) {
-      this.setSession(users[cleanUser].username);
+    const userRecord = users[cleanUser];
+    if (!userRecord) {
+      return { success: false, message: 'Invalid username or password' };
+    }
+
+    let isMatch = false;
+    if (userRecord.salt && userRecord.passwordHash) {
+      // Hashed/salted scheme
+      const computedHash = await this.hashPassword(password, userRecord.salt);
+      isMatch = (userRecord.passwordHash === computedHash);
+    } else {
+      // Old plain-text scheme compatibility
+      isMatch = (userRecord.password === password);
+      // Auto-upgrade user account to hashed scheme on successful login
+      if (isMatch) {
+        const salt = this.generateSalt();
+        const hash = await this.hashPassword(password, salt);
+        userRecord.salt = salt;
+        userRecord.passwordHash = hash;
+        delete userRecord.password;
+        localStorage.setItem('luna_users', JSON.stringify(users));
+      }
+    }
+
+    if (isMatch) {
+      this.setSession(userRecord.username);
       return { success: true };
     }
     return { success: false, message: 'Invalid username or password' };

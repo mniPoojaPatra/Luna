@@ -416,7 +416,7 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 
-/* Disable uppercase transform for memory wall, modals, breathing guide, and monitor photo elements */
+/* Disable uppercase transform for memory wall, modals, breathing guide, monitor photo, and login/signup elements */
 .memory-wall-container,
 .memory-wall-container *,
 .cozy-modal,
@@ -425,7 +425,8 @@ h1, h2, h3, h4, h5, h6 {
 .breathing-box *,
 .photo-screen,
 .photo-screen *,
-.photo-caption {
+.photo-caption,
+#view-login,
+#view-login * {
   text-transform: none !important;
 }
-
