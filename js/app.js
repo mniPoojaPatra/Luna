@@ -455,6 +455,10 @@ const App = {
 
     // Setup mood selectors
     this.selectedMood = 'cozy';
+    const editorStampCard = document.getElementById('editor-stamp-card');
+    if (editorStampCard) {
+      editorStampCard.style.setProperty('--mood-border-color', `var(--mood-cozy)`);
+    }
     document.querySelectorAll('.mood-option').forEach(opt => {
       opt.classList.remove('active');
       if (opt.getAttribute('data-mood') === 'cozy') {
@@ -466,6 +470,9 @@ const App = {
         document.querySelectorAll('.mood-option').forEach(o => o.classList.remove('active'));
         opt.classList.add('active');
         this.selectedMood = opt.getAttribute('data-mood');
+        if (editorStampCard) {
+          editorStampCard.style.setProperty('--mood-border-color', `var(--mood-${this.selectedMood})`);
+        }
       };
     });
 
@@ -497,6 +504,9 @@ const App = {
         
         // Select mood
         this.selectedMood = entry.mood;
+        if (editorStampCard) {
+          editorStampCard.style.setProperty('--mood-border-color', `var(--mood-${entry.mood})`);
+        }
         document.querySelectorAll('.mood-option').forEach(opt => {
           opt.classList.remove('active');
           if (opt.getAttribute('data-mood') === entry.mood) {
@@ -680,59 +690,98 @@ const App = {
     board.innerHTML = '';
     const entries = DB.getEntries();
 
-    // Let's create a list of the last 36 dates (starting from today going backward)
-    // to build our grid. This makes it a contiguous grid mapping.
-    const dates = [];
-    const today = new Date();
-    
-    // Generate dates representing a 6x6 grid = 36 slots, chronological oldest to newest
-    for (let i = 35; i >= 0; i--) {
-      const d = new Date(today);
-      d.setDate(today.getDate() - i);
-      dates.push(d.toISOString().split('T')[0]);
+    if (entries.length === 0) {
+      board.innerHTML = `
+        <div class="memory-wall-empty-state">
+          <span style="font-size: 3rem; display: block; margin-bottom: 10px;">📓</span>
+          <h3>Your scrapbook is empty</h3>
+          <p>Go to the desk to write your first memory and lock it in time.</p>
+        </div>
+      `;
+      return;
     }
 
-    dates.forEach(dateStr => {
-      // Find matching entry
-      const entry = entries.find(e => e.date === dateStr);
-      
-      const cell = document.createElement('div');
-      cell.className = 'memory-cell';
+    // Sort entries descending (newest first)
+    const sortedEntries = [...entries].sort((a, b) => new Date(b.date) - new Date(a.date));
 
-      if (entry) {
-        // Render hanging card
-        cell.innerHTML = `
-          <div class="peg-hook"></div>
-          <div class="hanging-string"></div>
-          <div class="wooden-clip"></div>
-          <div class="hanging-card-wrapper" style="--mood-border-color: var(--mood-${entry.mood});">
-            <div class="hanging-card" data-id="${entry.id}">
-              <div class="hanging-card-img-box">
-                ${entry.img 
-                  ? `<img src="${entry.img}" alt="Thumb">` 
-                  : `<div class="mood-solid-bg">🏷️</div>`}
+    // Group entries by Year and then by Month
+    const groups = {};
+    const monthNames = [
+      "January", "February", "March", "April", "May", "June",
+      "July", "August", "September", "October", "November", "December"
+    ];
+
+    sortedEntries.forEach(entry => {
+      const date = new Date(entry.date);
+      const year = date.getFullYear().toString();
+      const month = monthNames[date.getMonth()];
+
+      if (!groups[year]) groups[year] = {};
+      if (!groups[year][month]) groups[year][month] = [];
+      groups[year][month].push(entry);
+    });
+
+    const sortedYears = Object.keys(groups).sort((a, b) => b - a);
+
+    sortedYears.forEach(year => {
+      const yearSection = document.createElement('div');
+      yearSection.className = 'memory-year-section';
+
+      const yearHeader = document.createElement('h2');
+      yearHeader.className = 'memory-year-header';
+      yearHeader.textContent = year;
+      yearSection.appendChild(yearHeader);
+
+      const monthsInYear = groups[year];
+      const sortedMonths = Object.keys(monthsInYear).sort((a, b) => {
+        return monthNames.indexOf(b) - monthNames.indexOf(a);
+      });
+
+      sortedMonths.forEach(month => {
+        const monthSection = document.createElement('div');
+        monthSection.className = 'memory-month-section';
+
+        const monthHeader = document.createElement('h3');
+        monthHeader.className = 'memory-month-header';
+        monthHeader.textContent = month;
+        monthSection.appendChild(monthHeader);
+
+        const grid = document.createElement('div');
+        grid.className = 'memory-grid';
+
+        monthsInYear[month].forEach(entry => {
+          const cell = document.createElement('div');
+          cell.className = 'memory-cell';
+
+          cell.innerHTML = `
+            <div class="peg-hook"></div>
+            <div class="hanging-string"></div>
+            <div class="wooden-clip"></div>
+            <div class="hanging-card-wrapper" style="--mood-color: var(--mood-${entry.mood}); --mood-border-color: var(--mood-${entry.mood});">
+              <svg class="card-string" viewBox="0 0 100 100" preserveAspectRatio="none">
+                <path d="M50,0 L0,100 M50,0 L100,100" stroke="var(--mood-color)" stroke-width="1.5" fill="none" />
+              </svg>
+              <div class="hanging-card" data-id="${entry.id}">
+                <div class="hanging-card-img-box">
+                  ${entry.img 
+                    ? `<img src="${entry.img}" alt="Memory photo">` 
+                    : `<div class="mood-solid-bg">🏷️</div>`}
+                </div>
+                <div class="hanging-card-date">${this.formatShortDate(entry.date)}</div>
               </div>
-              <div class="hanging-card-date">${this.formatShortDate(entry.date)}</div>
             </div>
-          </div>
-        `;
+          `;
 
-        // Click to view detailed entry
-        cell.querySelector('.hanging-card').onclick = () => this.openJournalViewer(entry.id);
+          cell.querySelector('.hanging-card').onclick = () => this.openJournalViewer(entry.id);
 
-      } else {
-        // Render empty cell
-        const dateLabel = this.formatShortDate(dateStr);
-        cell.innerHTML = `
-          <div class="memory-cell-empty" title="Write a memory for ${dateLabel}">
-            <span class="empty-plus">+</span>
-            <span class="empty-date-label">${dateLabel}</span>
-          </div>
-        `;
-        cell.querySelector('.memory-cell-empty').onclick = () => this.openJournalEditor(dateStr);
-      }
+          grid.appendChild(cell);
+        });
 
-      board.appendChild(cell);
+        monthSection.appendChild(grid);
+        yearSection.appendChild(monthSection);
+      });
+
+      board.appendChild(yearSection);
     });
   },
 
@@ -768,7 +817,7 @@ const App = {
       viewerImgBox.innerHTML = `<img src="${entry.img}" alt="Journal entry Stamp">`;
     } else {
       viewerImgBox.innerHTML = `
-        <div style="width:100%; height:160px; display:flex; align-items:center; justify-content:center; background:#eae6db; color:#8c8172; border-radius:2px; font-size:2.5rem;">
+        <div style="width:100%; aspect-ratio:1/1; display:flex; align-items:center; justify-content:center; background:#eae6db; color:#8c8172; border-radius:2px; font-size:2.5rem; border:1px solid rgba(0,0,0,0.06);">
           🏷️
         </div>
       `;

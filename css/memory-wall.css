@@ -67,37 +67,99 @@
   overflow: hidden;
 }
 
-/* Grid of memories */
+/* Grid of memories: Default Zoomed In (3 columns) */
 .memory-grid {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 25px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 30px;
   width: 100%;
   transition: all 0.5s ease;
+  padding: 10px 0;
 }
 
-/* Zoom variations (keep 6 columns) */
-.memory-grid.zoomed-out {
+/* Zoomed Out variations (when parent has .zoomed-out) - 6 columns */
+.zoomed-out .memory-grid {
   grid-template-columns: repeat(6, 1fr);
   gap: 15px;
 }
 
-.memory-grid.zoomed-out .hanging-card {
-  transform: scale(0.8);
-  font-size: 0.7rem;
+.zoomed-out .hanging-card {
+  transform: scale(0.85);
+  font-size: 0.75rem;
+}
+
+/* Grouping and Empty States */
+.memory-year-section {
+  margin-bottom: 40px;
+}
+
+.memory-year-header {
+  font-size: 2.2rem;
+  color: var(--text-main);
+  border-bottom: 1px dashed var(--panel-border);
+  padding-bottom: 8px;
+  margin-bottom: 24px;
+  font-family: var(--font-header);
+}
+
+.memory-month-section {
+  margin-bottom: 30px;
+  padding-left: 10px;
+}
+
+.memory-month-header {
+  font-size: 1.4rem;
+  color: var(--accent-color);
+  margin-bottom: 16px;
+  font-family: var(--font-header);
+}
+
+.memory-wall-empty-state {
+  text-align: center;
+  padding: 80px 20px;
+  color: var(--text-muted);
+}
+
+.memory-wall-empty-state h3 {
+  font-size: 1.5rem;
+  color: var(--text-main);
+  margin-bottom: 8px;
+}
+
+/* Slanted mood-colored string */
+.card-string {
+  position: absolute;
+  top: 0;
+  left: 5%;
+  width: 90%;
+  height: 22px;
+  z-index: 2;
+  pointer-events: none;
 }
 
 @media (max-width: 992px) {
-  .memory-grid, .memory-grid.zoomed-out {
-    grid-template-columns: repeat(4, 1fr);
+  /* Zoomed In (default): 2 columns */
+  .memory-grid {
+    grid-template-columns: repeat(2, 1fr);
     gap: 20px;
+  }
+  /* Zoomed Out: 4 columns */
+  .zoomed-out .memory-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
   }
 }
 
 @media (max-width: 576px) {
-  .memory-grid, .memory-grid.zoomed-out {
-    grid-template-columns: repeat(2, 1fr);
+  /* Zoomed In (default): 1 column */
+  .memory-grid {
+    grid-template-columns: 1fr;
     gap: 15px;
+  }
+  /* Zoomed Out: 2 columns */
+  .zoomed-out .memory-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
   }
 }
 
@@ -199,7 +261,7 @@
 /* Swinging card container */
 .hanging-card-wrapper {
   position: absolute;
-  top: 35px;
+  top: 43px; /* pivot point exactly at the bottom-center of the wooden clip */
   left: 0;
   right: 0;
   bottom: 0;
@@ -223,43 +285,36 @@
   100% { transform: rotate(6deg) scale(1.05); }
 }
 
-/* The Hanging Stamp Card itself */
+/* The Hanging Polaroid Card itself */
 .hanging-card {
   width: 90%;
-  margin: 0 auto;
-  aspect-ratio: 3.5 / 4.2;
+  margin: 18px auto 0 auto; /* push the card down to make space for the hanging string */
   background: #faf8f5;
   color: #2c251e;
-  border-radius: 2px;
-  box-shadow: 2px 5px 12px rgba(0,0,0,0.25);
-  padding: 8px;
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.22);
+  padding: 10px 10px 24px 10px; /* Polaroid thick bottom margin (chin) */
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  border: 6px solid #faf8f5;
-  border-image: radial-gradient(circle, transparent 2px, #faf8f5 3px) 6 repeat;
+  border: 2px solid var(--mood-border-color, #eae6db); /* clean solid border */
   cursor: pointer;
-  transition: transform 0.2s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
   position: relative;
   background-clip: padding-box;
 }
 
-/* Mood Color Border highlight */
+/* Mood Color Border highlight removed/hidden */
 .hanging-card::before {
-  content: '';
-  position: absolute;
-  top: -4px; left: -4px; right: -4px; bottom: -4px;
-  border: 2px solid var(--mood-border-color, var(--mood-joyful));
-  pointer-events: none;
-  z-index: 2;
+  display: none;
 }
 
 .hanging-card-img-box {
   width: 100%;
-  height: 70%;
+  aspect-ratio: 1 / 1; /* perfect square image box */
   background: #eae6db;
   border-radius: 2px;
   overflow: hidden;
+  border: 1px solid rgba(0,0,0,0.06);
 }
 
 .hanging-card-img-box img {
@@ -280,16 +335,17 @@
 }
 
 .hanging-card-date {
-  font-family: var(--font-header);
-  font-size: 0.75rem;
-  color: #635850;
+  font-family: var(--font-handwritten);
+  font-size: 1rem;
+  color: #5c4d4c;
   text-align: center;
-  border-top: 1px dashed #eae6db;
-  padding-top: 2px;
-  margin-top: 2px;
+  border-top: 1px dashed rgba(0,0,0,0.06);
+  padding-top: 4px;
+  margin-top: 4px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  text-transform: none !important;
 }
 
 /* Journal View Details Modal Specifics */
@@ -335,18 +391,28 @@
 
 .view-modal-stamp {
   width: 220px;
-  border: 12px solid #faf8f5;
-  border-image: radial-gradient(circle, transparent 4px, #faf8f5 5px) 12 repeat;
   background: #faf8f5;
-  padding: 12px 12px 30px 12px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  padding: 10px 10px 24px 10px; /* Polaroid thick bottom margin */
+  border-radius: 6px;
+  border: 2px solid var(--mood-border-color, #eae6db);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+  display: flex;
+  flex-direction: column;
 }
 
-.view-modal-stamp img {
+#viewer-image-container {
   width: 100%;
-  height: 160px;
-  object-fit: cover;
+  aspect-ratio: 1 / 1;
+  background: #eae6db;
   border-radius: 2px;
+  overflow: hidden;
+  border: 1px solid rgba(0,0,0,0.06);
+}
+
+#viewer-image-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .view-modal-text {
