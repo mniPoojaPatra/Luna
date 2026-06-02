@@ -2,6 +2,17 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.widget-lamp,
+.widget-radio,
+.widget-monitor,
+.widget-notebook,
+.widget-sticky,
+.widget-sticky-bg,
+.hanging-card {
+  outline: none;
 }
 
 body {
