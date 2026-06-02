@@ -679,8 +679,8 @@ body.lamp-on .lamp-switch::after {
 }
 
 .speaker-grill {
-  width: 45px;
-  height: 45px;
+  width: 35px;
+  height: 35px;
   background: radial-gradient(#1a202c 25%, transparent 26%), radial-gradient(#1a202c 25%, transparent 26%);
   background-size: 4px 4px;
   background-position: 0 0, 2px 2px;

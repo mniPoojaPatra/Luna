@@ -758,10 +758,10 @@ const App = {
             <div class="hanging-string"></div>
             <div class="wooden-clip"></div>
             <div class="hanging-card-wrapper" style="--mood-color: var(--mood-${entry.mood}); --mood-border-color: var(--mood-${entry.mood});">
-              <svg class="card-string" viewBox="0 0 100 100" preserveAspectRatio="none">
-                <path d="M50,0 L0,100 M50,0 L100,100" stroke="var(--mood-color)" stroke-width="1.5" fill="none" />
-              </svg>
               <div class="hanging-card" data-id="${entry.id}">
+                <svg class="card-string" viewBox="0 0 100 100" preserveAspectRatio="none">
+                  <path d="M50,0 L0,100 M50,0 L100,100" stroke="var(--mood-color)" stroke-width="1.5" fill="none" />
+                </svg>
                 <div class="hanging-card-img-box">
                   ${entry.img 
                     ? `<img src="${entry.img}" alt="Memory photo">` 
