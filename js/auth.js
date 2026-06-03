@@ -1,4 +1,4 @@
-import DB from './db.js';
+import DB, { supabase } from './db.js';
 
 const Auth = {
   onLoginSuccess: null, // Callback when login succeeds
@@ -39,19 +39,21 @@ const Auth = {
     if (loginForm) {
       loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const userVal = document.getElementById('login-username').value;
+        const emailVal = document.getElementById('login-email').value;
         const passVal = document.getElementById('login-password').value;
         const alertBox = document.getElementById('login-alert');
 
-        if (!userVal || !passVal) {
+        if (!emailVal || !passVal) {
           this.showAlert(alertBox, 'Please fill in all fields', 'error');
           return;
         }
 
-        const res = await DB.authenticateUser(userVal, passVal);
+        this.showAlert(alertBox, 'Stepping inside...', 'success');
+
+        const res = await DB.authenticateUser(emailVal, passVal);
         if (res.success) {
           loginForm.reset();
-          if (this.onLoginSuccess) this.onLoginSuccess(userVal);
+          if (this.onLoginSuccess) this.onLoginSuccess(DB.getActiveUser());
         } else {
           this.showAlert(alertBox, res.message, 'error');
         }
@@ -61,12 +63,13 @@ const Auth = {
     if (signupForm) {
       signupForm.addEventListener('submit', async (e) => {
         e.preventDefault();
+        const emailVal = document.getElementById('signup-email').value;
         const userVal = document.getElementById('signup-username').value;
         const passVal = document.getElementById('signup-password').value;
         const passConfVal = document.getElementById('signup-confirm-password').value;
         const alertBox = document.getElementById('signup-alert');
 
-        if (!userVal || !passVal || !passConfVal) {
+        if (!emailVal || !userVal || !passVal || !passConfVal) {
           this.showAlert(alertBox, 'Please fill in all fields', 'error');
           return;
         }
@@ -76,8 +79,8 @@ const Auth = {
           return;
         }
 
-        if (passVal.length < 4) {
-          this.showAlert(alertBox, 'Password must be at least 4 characters', 'error');
+        if (passVal.length < 6) {
+          this.showAlert(alertBox, 'Password must be at least 6 characters', 'error');
           return;
         }
 
@@ -86,19 +89,41 @@ const Auth = {
           return;
         }
 
-        const res = await DB.registerUser(userVal, passVal);
+        this.showAlert(alertBox, 'Forging space...', 'success');
+
+        const res = await DB.registerUser(emailVal, passVal, userVal);
         if (res.success) {
-          this.showAlert(alertBox, 'Account created! Switching to Login...', 'success');
+          this.showAlert(alertBox, 'Space forged! Please check email or step inside.', 'success');
           signupForm.reset();
           
           setTimeout(() => {
             signupPanel.style.display = 'none';
             loginPanel.style.display = 'block';
             this.clearAlerts();
-            document.getElementById('login-username').value = userVal;
-          }, 1500);
+            document.getElementById('login-email').value = emailVal;
+          }, 2000);
         } else {
           this.showAlert(alertBox, res.message, 'error');
+        }
+      });
+    }
+
+    // Google Login button binding
+    const btnGoogle = document.getElementById('btn-google-login');
+    if (btnGoogle) {
+      btnGoogle.addEventListener('click', async () => {
+        if (supabase) {
+          const { error } = await supabase.auth.signInWithOAuth({
+            provider: 'google',
+            options: {
+              redirectTo: window.location.origin
+            }
+          });
+          if (error) {
+            alert('Google Auth error: ' + error.message);
+          }
+        } else {
+          alert('Supabase is not configured yet.');
         }
       });
     }

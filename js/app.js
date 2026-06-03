@@ -1,4 +1,4 @@
-import DB from './db.js';
+import DB, { supabase, isConfigured } from './db.js';
 import Auth from './auth.js';
 import ThemeManager from './theme.js';
 import Camera from './camera.js';
@@ -12,20 +12,85 @@ const App = {
   tempPhotoData: null, // holds base64 photo for current editor
   editingEntryId: null, // holds ID if editing an existing entry
 
-  init() {
-    // Check if session exists
-    const loggedInUser = DB.getActiveUser();
-    if (loggedInUser) {
-      this.loginSuccess(loggedInUser);
+  async init() {
+    // 1. Setup Form Event for Supabase Setup
+    const setupForm = document.getElementById('setup-form');
+    if (setupForm) {
+      setupForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const url = document.getElementById('setup-url').value.trim();
+        const key = document.getElementById('setup-anon-key').value.trim();
+        const alertBox = document.getElementById('setup-alert');
+        
+        if (!url || !key) {
+          alertBox.textContent = 'Please fill in both fields.';
+          alertBox.className = 'auth-alert error';
+          return;
+        }
+        
+        localStorage.setItem('luna_supabase_url', url);
+        localStorage.setItem('luna_supabase_anon_key', key);
+        alertBox.textContent = 'Connected! Refreshing application...';
+        alertBox.className = 'auth-alert success';
+        
+        setTimeout(() => {
+          window.location.reload();
+        }, 1500);
+      });
+    }
+
+    // 2. Check if Supabase is Configured
+    if (!isConfigured) {
+      const setupOverlay = document.getElementById('supabase-setup-overlay');
+      if (setupOverlay) setupOverlay.style.display = 'flex';
+      this.showView('view-login');
+      return;
+    }
+
+    // 3. Initialize Auth bindings
+    Auth.init((username) => this.loginSuccess(username));
+
+    // 4. Bind navigation and general events
+    this.bindGlobalEvents();
+
+    // 5. Check if session exists and load profile
+    const activeSessionUser = await DB.getSessionUser();
+    if (activeSessionUser) {
+      const loader = document.getElementById('app-syncing-overlay');
+      if (loader) loader.style.display = 'flex';
+      
+      const success = await DB.loadUserData();
+      
+      if (loader) loader.style.display = 'none';
+      
+      if (success) {
+        this.loginSuccess(DB.getActiveUser());
+      } else {
+        this.showView('view-login');
+      }
     } else {
       this.showView('view-login');
     }
 
-    // Initialize Auth bindings
-    Auth.init((username) => this.loginSuccess(username));
-
-    // Bind navigation and general events
-    this.bindGlobalEvents();
+    // 6. Listen for auth changes (handles OAuth redirects)
+    if (supabase) {
+      supabase.auth.onAuthStateChange(async (event, session) => {
+        if (session && session.user) {
+          DB.setSession(session.user.user_metadata?.username, session.user.email);
+          const currentActive = DB.getActiveUser();
+          
+          if (!DB.profileCache) {
+            const loader = document.getElementById('app-syncing-overlay');
+            if (loader) loader.style.display = 'flex';
+            
+            await DB.loadUserData();
+            
+            if (loader) loader.style.display = 'none';
+            this.loginSuccess(currentActive);
+          }
+        }
+      });
+    }
   },
 
   showView(viewId) {
@@ -1056,8 +1121,8 @@ const App = {
   }
 };
 
-window.addEventListener('DOMContentLoaded', () => {
-  App.init();
+window.addEventListener('DOMContentLoaded', async () => {
+  await App.init();
 });
 
 export default App;

@@ -1,129 +1,221 @@
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+import { SUPABASE_CONFIG } from './config.js';
+
+let supabase = null;
+
+// Retrieve Supabase credentials from config file or localStorage
+function getSupabaseCredentials() {
+  let url = SUPABASE_CONFIG.url;
+  let anonKey = SUPABASE_CONFIG.anonKey;
+
+  if (!url || url === 'YOUR_SUPABASE_URL' || url.trim() === '') {
+    url = localStorage.getItem('luna_supabase_url');
+  }
+  if (!anonKey || anonKey === 'YOUR_SUPABASE_ANON_KEY' || anonKey.trim() === '') {
+    anonKey = localStorage.getItem('luna_supabase_anon_key');
+  }
+
+  return { url, anonKey };
+}
+
+const creds = getSupabaseCredentials();
+const isConfigured = creds.url && creds.anonKey && creds.url !== 'YOUR_SUPABASE_URL' && creds.url.trim() !== '';
+
+if (isConfigured) {
+  supabase = createClient(creds.url, creds.anonKey);
+}
+
 const DB = {
-  // Authentication & Users
-  getUsers() {
-    return JSON.parse(localStorage.getItem('luna_users') || '{}');
-  },
+  profileCache: null,
+  entriesCache: [],
 
-  // Helper to hash password using SHA-256
-  async hashPassword(password, salt) {
-    const encoder = new TextEncoder();
-    const data = encoder.encode(password + salt);
-    const hashBuffer = await window.crypto.subtle.digest('SHA-256', data);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-  },
-
-  // Helper to generate a random salt
-  generateSalt() {
-    const saltArray = new Uint8Array(16);
-    window.crypto.getRandomValues(saltArray);
-    return Array.from(saltArray).map(b => b.toString(16).padStart(2, '0')).join('');
-  },
-
-  async registerUser(username, password) {
-    const users = this.getUsers();
-    const cleanUser = username.trim().toLowerCase();
-    if (users[cleanUser]) {
-      return { success: false, message: 'Username already exists' };
-    }
-    const salt = this.generateSalt();
-    const hash = await this.hashPassword(password, salt);
-    users[cleanUser] = {
-      username: username.trim(),
-      salt: salt,
-      passwordHash: hash
-    };
-    localStorage.setItem('luna_users', JSON.stringify(users));
-    return { success: true };
-  },
-
-  async authenticateUser(username, password) {
-    const users = this.getUsers();
-    const cleanUser = username.trim().toLowerCase();
-    const userRecord = users[cleanUser];
-    if (!userRecord) {
-      return { success: false, message: 'Invalid username or password' };
-    }
-
-    let isMatch = false;
-    if (userRecord.salt && userRecord.passwordHash) {
-      // Hashed/salted scheme
-      const computedHash = await this.hashPassword(password, userRecord.salt);
-      isMatch = (userRecord.passwordHash === computedHash);
-    } else {
-      // Old plain-text scheme compatibility
-      isMatch = (userRecord.password === password);
-      // Auto-upgrade user account to hashed scheme on successful login
-      if (isMatch) {
-        const salt = this.generateSalt();
-        const hash = await this.hashPassword(password, salt);
-        userRecord.salt = salt;
-        userRecord.passwordHash = hash;
-        delete userRecord.password;
-        localStorage.setItem('luna_users', JSON.stringify(users));
-      }
-    }
-
-    if (isMatch) {
-      this.setSession(userRecord.username);
-      return { success: true };
-    }
-    return { success: false, message: 'Invalid username or password' };
-  },
-
-  setSession(username) {
-    sessionStorage.setItem('luna_active_user', username);
+  // Authentication & Session
+  setSession(username, email) {
+    sessionStorage.setItem('luna_active_user', username || email.split('@')[0]);
   },
 
   getActiveUser() {
-    return sessionStorage.getItem('luna_active_user');
+    return sessionStorage.getItem('luna_active_user') || null;
   },
 
-  logout() {
+  async logout() {
     sessionStorage.removeItem('luna_active_user');
-  },
-
-  // User-scoped data access helpers
-  getUserKey(suffix) {
-    const user = this.getActiveUser();
-    if (!user) return null;
-    return `luna_data_${user.toLowerCase()}_${suffix}`;
-  },
-
-  get(suffix, defaultValue = null) {
-    const key = this.getUserKey(suffix);
-    if (!key) return defaultValue;
-    const val = localStorage.getItem(key);
-    if (val === null) return defaultValue;
-    try {
-      return JSON.parse(val);
-    } catch {
-      return val;
+    if (supabase) {
+      await supabase.auth.signOut();
     }
   },
 
-  set(suffix, value) {
-    const key = this.getUserKey(suffix);
-    if (!key) return;
-    localStorage.setItem(key, JSON.stringify(value));
+  async getSessionUser() {
+    if (!supabase) return null;
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session && session.user) {
+      this.setSession(session.user.user_metadata?.username, session.user.email);
+      return session.user;
+    }
+    return null;
   },
 
-  // Scoped Operations
+  async registerUser(email, password, username) {
+    if (!supabase) return { success: false, message: 'Supabase is not configured yet.' };
+
+    const { data, error } = await supabase.auth.signUp({
+      email: email,
+      password: password,
+      options: {
+        data: {
+          username: username
+        }
+      }
+    });
+
+    if (error) {
+      return { success: false, message: error.message };
+    }
+
+    return { success: true };
+  },
+
+  async authenticateUser(email, password) {
+    if (!supabase) return { success: false, message: 'Supabase is not configured yet.' };
+
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: email,
+      password: password
+    });
+
+    if (error) {
+      return { success: false, message: error.message };
+    }
+
+    if (data.user) {
+      this.setSession(data.user.user_metadata?.username, data.user.email);
+      return { success: true };
+    }
+
+    return { success: false, message: 'Failed to authenticate user.' };
+  },
+
+  // Synchronous initial data sync on startup/login
+  async loadUserData() {
+    if (!supabase) return false;
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return false;
+
+      // 1. Fetch Profile
+      let { data: profile, error: profileErr } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+
+      if (profileErr || !profile) {
+        // Upsert default profile
+        const defaultProfile = {
+          id: user.id,
+          username: user.user_metadata?.username || user.email.split('@')[0],
+          lamp_status: false,
+          active_theme: 'theme-forest',
+          sticky_left: 'be gentle with yourself 🌸',
+          sticky_center: 'Cherish yourself, because you are worth it.',
+          sticky_right: 'grow at your own pace 🌱',
+          checklist: [
+            { id: '1', text: 'take a deep breath', completed: false },
+            { id: '2', text: 'write down my mood', completed: false }
+          ]
+        };
+
+        const { data: newProfile, error: createErr } = await supabase
+          .from('profiles')
+          .upsert(defaultProfile)
+          .select()
+          .single();
+
+        profile = newProfile || defaultProfile;
+      }
+
+      this.profileCache = profile;
+
+      // 2. Fetch Journal Entries
+      const { data: entries, error: entriesErr } = await supabase
+        .from('entries')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('date', { ascending: false });
+
+      this.entriesCache = entries || [];
+      return true;
+    } catch (e) {
+      console.error("Error loading user data from cloud:", e);
+      return false;
+    }
+  },
+
+  // Background profile sync
+  saveProfileBackground() {
+    if (!supabase || !this.profileCache) return;
+    supabase
+      .from('profiles')
+      .upsert(this.profileCache)
+      .then(({ error }) => {
+        if (error) console.error("Error updating profile in Supabase:", error);
+      });
+  },
+
+  // Photo Uploader (Base64 dataURL -> Supabase Storage memories bucket -> public URL)
+  async uploadPhoto(fileDataUrl, pathPrefix) {
+    if (!supabase) return null;
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return null;
+
+      // Convert Base64 dataURL to Blob
+      const res = await fetch(fileDataUrl);
+      const blob = await res.blob();
+
+      // Create unique filepath: userId/prefix_timestamp.png
+      const filePath = `${user.id}/${pathPrefix}_${Date.now()}.png`;
+
+      const { error } = await supabase.storage
+        .from('memories')
+        .upload(filePath, blob, {
+          contentType: 'image/png',
+          upsert: true
+        });
+
+      if (error) {
+        console.error("Error uploading photo to storage:", error);
+        return null;
+      }
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('memories')
+        .getPublicUrl(filePath);
+
+      return publicUrl;
+    } catch (e) {
+      console.error("Error in photo upload handler:", e);
+      return null;
+    }
+  },
+
+  // Sync operations reading from memory cache and syncing in the background
   getEntries() {
-    return this.get('entries', []);
+    return this.entriesCache || [];
   },
 
   saveEntry(entry) {
     const entries = this.getEntries();
-    // Check if entry for this date already exists to prevent duplicate dates
     const existingIndex = entries.findIndex(e => e.date === entry.date);
-    
+
+    const entryId = entry.id || crypto.randomUUID();
+
     const entryData = {
-      id: entry.id || Date.now().toString(),
+      id: entryId,
       date: entry.date,
       mood: entry.mood,
       text: entry.text || '',
-      img: entry.img || null,
+      img: entry.img || null, // temporary base64
       good: entry.good || '',
       upset: entry.upset || '',
       improve: entry.improve || '',
@@ -135,79 +227,154 @@ const DB = {
     } else {
       entries.push(entryData);
     }
-
-    // Sort entries chronological (newest first for memory wall or calendar sorting)
     entries.sort((a, b) => new Date(b.date) - new Date(a.date));
-    this.set('entries', entries);
+    this.entriesCache = entries;
+
+    // Trigger background upload and database save
+    this.saveEntryBackground(entryData);
+
     return entryData;
   },
 
-  deleteEntry(id) {
-    const entries = this.getEntries();
-    const filtered = entries.filter(e => e.id !== id);
-    this.set('entries', filtered);
+  async saveEntryBackground(entryData) {
+    if (!supabase) return;
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      let finalImg = entryData.img;
+
+      if (finalImg && finalImg.startsWith('data:image/')) {
+        const uploadedUrl = await this.uploadPhoto(finalImg, 'entry');
+        if (uploadedUrl) {
+          finalImg = uploadedUrl;
+          // Update cache with public URL
+          const found = this.entriesCache.find(e => e.id === entryData.id);
+          if (found) found.img = uploadedUrl;
+        }
+      }
+
+      const dbRow = {
+        id: entryData.id,
+        user_id: user.id,
+        date: entryData.date,
+        mood: entryData.mood,
+        text: entryData.text,
+        good: entryData.good,
+        upset: entryData.upset,
+        improve: entryData.improve,
+        img: finalImg
+      };
+
+      const { error } = await supabase
+        .from('entries')
+        .upsert(dbRow, { onConflict: 'user_id, date' });
+
+      if (error) {
+        console.error("Error saving entry to Supabase DB:", error);
+      }
+    } catch (e) {
+      console.error("Error in background entry saver:", e);
+    }
   },
 
-  // Dashboard Settings
+  deleteEntry(id) {
+    if (!this.entriesCache) return;
+    this.entriesCache = this.entriesCache.filter(e => e.id !== id);
+
+    if (supabase) {
+      supabase
+        .from('entries')
+        .delete()
+        .eq('id', id)
+        .then(({ error }) => {
+          if (error) console.error("Error deleting entry from Supabase:", error);
+        });
+    }
+  },
+
   getLampState() {
-    return this.get('lamp_state', false);
+    return this.profileCache ? this.profileCache.lamp_status : false;
   },
 
   setLampState(isOn) {
-    this.set('lamp_state', isOn);
+    if (this.profileCache) {
+      this.profileCache.lamp_status = isOn;
+      this.saveProfileBackground();
+    }
   },
 
   getPhotoFrameImage() {
-    // Return a cozy fallback image or null
-    return this.get('frame_image', null);
+    return this.profileCache ? this.profileCache.custom_frame_img : null;
   },
 
-  setPhotoFrameImage(imgBase64) {
-    this.set('frame_image', imgBase64);
+  async setPhotoFrameImage(imgBase64) {
+    if (this.profileCache) {
+      this.profileCache.custom_frame_img = imgBase64;
+    }
+    // Upload in background
+    const url = await this.uploadPhoto(imgBase64, 'frame');
+    if (url && this.profileCache) {
+      this.profileCache.custom_frame_img = url;
+      this.saveProfileBackground();
+    }
   },
 
   getLeftStickyQuote() {
-    return this.get('sticky_quote_left', 'be gentle with yourself 🌸');
+    return this.profileCache ? this.profileCache.sticky_left : 'be gentle with yourself 🌸';
   },
 
   setLeftStickyQuote(quote) {
-    this.set('sticky_quote_left', quote);
+    if (this.profileCache) {
+      this.profileCache.sticky_left = quote;
+      this.saveProfileBackground();
+    }
   },
 
   getStickyQuote() {
-    return this.get('sticky_quote', 'Cherish yourself, because you are worth it.');
+    return this.profileCache ? this.profileCache.sticky_center : 'Cherish yourself, because you are worth it.';
   },
 
   setStickyQuote(quote) {
-    this.set('sticky_quote', quote);
+    if (this.profileCache) {
+      this.profileCache.sticky_center = quote;
+      this.saveProfileBackground();
+    }
   },
 
   getRightStickyQuote() {
-    return this.get('sticky_quote_right', 'grow at your own pace 🌱');
+    return this.profileCache ? this.profileCache.sticky_right : 'grow at your own pace 🌱';
   },
 
   setRightStickyQuote(quote) {
-    this.set('sticky_quote_right', quote);
+    if (this.profileCache) {
+      this.profileCache.sticky_right = quote;
+      this.saveProfileBackground();
+    }
   },
 
   getChecklist() {
-    return this.get('checklist', [
-      { id: '1', text: 'take a deep breath', completed: false },
-      { id: '2', text: 'write down my mood', completed: false }
-    ]);
+    return this.profileCache ? this.profileCache.checklist : [];
   },
 
   saveChecklist(list) {
-    this.set('checklist', list);
+    if (this.profileCache) {
+      this.profileCache.checklist = list;
+      this.saveProfileBackground();
+    }
   },
 
   getActiveTheme() {
-    return this.get('active_theme', 'theme-forest');
+    return this.profileCache ? this.profileCache.active_theme : 'theme-forest';
   },
 
   setActiveTheme(themeName) {
-    this.set('active_theme', themeName);
+    if (this.profileCache) {
+      this.profileCache.active_theme = themeName;
+      this.saveProfileBackground();
+    }
   }
 };
 
+export { supabase, isConfigured };
 export default DB;

@@ -12,6 +12,8 @@
   <link rel="stylesheet" href="css/journal.css">
   <link rel="stylesheet" href="css/memory-wall.css">
   <link rel="stylesheet" href="css/calendar.css">
+  <!-- Supabase CDN Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body class="theme-forest">
 
@@ -67,14 +69,15 @@
           
           <form id="login-form" class="auth-form">
             <div class="input-group">
-              <label for="login-username">username</label>
-              <input type="text" id="login-username" class="cozy-input" placeholder="enter your name" required autocomplete="username">
+              <label for="login-email">Email Address</label>
+              <input type="email" id="login-email" class="cozy-input" placeholder="enter your email" required autocomplete="email">
             </div>
             <div class="input-group">
-              <label for="login-password">passcode</label>
-              <input type="password" id="login-password" class="cozy-input" placeholder="••••" required autocomplete="current-password">
+              <label for="login-password">Password</label>
+              <input type="password" id="login-password" class="cozy-input" placeholder="••••••••" required autocomplete="current-password">
             </div>
             <button type="submit" class="cozy-btn" style="justify-content: center; margin-top: 10px;">step inside</button>
+            <button type="button" class="cozy-btn cozy-btn-secondary" id="btn-google-login" style="justify-content: center; margin-top: 8px;">🔑 Sign in with Google</button>
           </form>
           
           <div class="auth-options">
@@ -92,16 +95,20 @@
           
           <form id="signup-form" class="auth-form">
             <div class="input-group">
-              <label for="signup-username">username</label>
-              <input type="text" id="signup-username" class="cozy-input" placeholder="choose a username" required autocomplete="username">
+              <label for="signup-email">Email Address</label>
+              <input type="email" id="signup-email" class="cozy-input" placeholder="enter your email" required autocomplete="email">
             </div>
             <div class="input-group">
-              <label for="signup-password">passcode</label>
-              <input type="password" id="signup-password" class="cozy-input" placeholder="at least 4 characters" required autocomplete="new-password">
+              <label for="signup-username">Username / Name</label>
+              <input type="text" id="signup-username" class="cozy-input" placeholder="choose a display name" required autocomplete="username">
             </div>
             <div class="input-group">
-              <label for="signup-confirm-password">confirm passcode</label>
-              <input type="password" id="signup-confirm-password" class="cozy-input" placeholder="re-enter passcode" required autocomplete="new-password">
+              <label for="signup-password">Password</label>
+              <input type="password" id="signup-password" class="cozy-input" placeholder="at least 6 characters" required autocomplete="new-password">
+            </div>
+            <div class="input-group">
+              <label for="signup-confirm-password">Confirm Password</label>
+              <input type="password" id="signup-confirm-password" class="cozy-input" placeholder="re-enter password" required autocomplete="new-password">
             </div>
             <button type="submit" class="cozy-btn" style="justify-content: center; margin-top: 10px;">forge space</button>
           </form>
@@ -543,6 +550,45 @@
         <button class="cozy-btn" id="btn-choice-camera" style="justify-content: center;">📷 Take Live Photo</button>
         <button class="cozy-btn cozy-btn-secondary" id="btn-choice-upload" style="justify-content: center;">📁 Upload Image</button>
       </div>
+    </div>
+  </div>
+
+  <!-- Supabase Cloud Setup Overlay (Displayed if keys are missing) -->
+  <div class="cozy-overlay" id="supabase-setup-overlay" style="display: none;">
+    <div class="setup-container">
+      <span class="auth-logo">☁️</span>
+      <h2 class="auth-title">Setup Cozy Cloud</h2>
+      <p class="auth-subtitle" style="margin-bottom: 20px;">Link a free Supabase database to sync your journal and save photos.</p>
+      
+      <div id="setup-alert" class="auth-alert" style="margin-bottom: 15px;"></div>
+      
+      <form id="setup-form" class="auth-form">
+        <div class="input-group">
+          <label for="setup-url">Supabase Project URL</label>
+          <input type="url" id="setup-url" class="cozy-input" placeholder="https://your-project.supabase.co" required>
+        </div>
+        <div class="input-group">
+          <label for="setup-anon-key">Supabase Anon API Key</label>
+          <input type="password" id="setup-anon-key" class="cozy-input" placeholder="eyJhbGciOiJIUzI1NiIsIn..." required>
+        </div>
+        <button type="submit" class="cozy-btn" style="justify-content: center; margin-top: 10px;">Connect Cloud</button>
+      </form>
+      
+      <div class="setup-instructions" style="margin-top: 24px; text-align: left; font-size: 0.8rem; line-height: 1.4; color: var(--text-muted);">
+        <h4 style="margin-bottom: 8px; color: var(--text-main); font-size: 0.85rem;">How to get these?</h4>
+        <p style="margin-bottom: 4px;">1. Go to <a href="https://supabase.com" target="_blank" class="auth-link">Supabase.com</a> and sign up for a free project.</p>
+        <p style="margin-bottom: 4px;">2. Go to Project Settings ➔ API inside Supabase.</p>
+        <p style="margin-bottom: 4px;">3. Copy the <strong>Project URL</strong> and <strong>anon public API Key</strong> and paste them above.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- App Syncing Loading Overlay -->
+  <div class="cozy-overlay" id="app-syncing-overlay" style="display: none; z-index: 9999;">
+    <div class="sync-loader-content">
+      <span class="sync-spinner">🌙</span>
+      <h3 style="font-size: 1.5rem; margin-top: 15px; color: var(--text-main);">Syncing with Cloud...</h3>
+      <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 5px;">Fetching your cozy nights and memories</p>
     </div>
   </div>
 
