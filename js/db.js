@@ -19,7 +19,11 @@ function getSupabaseCredentials() {
 }
 
 const creds = getSupabaseCredentials();
-const isConfigured = creds.url && creds.anonKey && creds.url !== 'YOUR_SUPABASE_URL' && creds.url.trim() !== '';
+const isConfigured = creds.url && creds.anonKey && 
+                     creds.url !== 'YOUR_SUPABASE_URL' && 
+                     creds.url.trim() !== '' &&
+                     creds.anonKey !== 'YOUR_SUPABASE_ANON_KEY' &&
+                     creds.anonKey.trim() !== '';
 
 if (isConfigured) {
   supabase = createClient(creds.url, creds.anonKey);
